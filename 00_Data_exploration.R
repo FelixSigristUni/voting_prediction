@@ -20,15 +20,34 @@ summary(txt_vars)
 # Quick glance at structure and data types
 glimpse(txt_vars)
 
-# Anzahl Fälle OHNE Buchstaben (keine Antwort oder fehlend)
-num_no_answer <- sum(!grepl("[a-zA-Z]", txt_vars$reason1_acc1_txt) | 
-                       is.na(txt_vars$reason1_acc1_txt))
+# Initialize an empty result tibble
+result <- tibble(
+  Variable = character(),
+  Num_Answered = integer(),
+  Num_Not_Answered = integer()
+)
 
-# Anzahl Fälle MIT mindestens einem Buchstaben (Antwort vorhanden)
-num_answered <- sum(grepl("[a-zA-Z]", txt_vars$reason1_acc1_txt))
+# Loop through each variable (column) in the dataframe txt_vars
+for (var_name in names(txt_vars)) {
+  
+  # Count valid responses (at least one letter present)
+  num_answered <- sum(grepl("[a-zA-Z]", txt_vars[[var_name]]))
+  
+  # Count invalid responses (no letters or NA)
+  num_not_answered <- sum(!grepl("[a-zA-Z]", txt_vars[[var_name]]) |
+                            is.na(txt_vars[[var_name]]))
+  
+  # Append counts to the results tibble
+  result <- result %>% 
+    add_row(
+      Variable = var_name,
+      Num_Answered = num_answered,
+      Num_Not_Answered = num_not_answered
+    )
+}
 
-# Ergebnisse anzeigen
-cat("Keine Antwort (keine Buchstaben oder NA):", num_no_answer, "\n")
-cat("Antwort gegeben (mindestens ein Buchstabe):", num_answered, "\n")
+# Display the summary results
+print(result)
+
 
 
