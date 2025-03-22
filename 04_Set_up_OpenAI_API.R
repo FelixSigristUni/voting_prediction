@@ -1,6 +1,6 @@
-# Read the SPSS file into an R dataframe
-VOTOdata <- read_sav("Datasets/1231_VOTO_CumulativeDataset_Data_scrutin_v1.0.0.sav")
+# Read the rds file into an R dataframe
 
+VOTOdata_clean <- readRDS("Datasets/VOTOdata_clean.rds")
 
 
 # Send request to open ai
@@ -16,7 +16,7 @@ bearer <- stringr::str_c("Authorization: Bearer ", APIkey)
 #first request
  questiontext<- paste(readLines("prompt1.txt"),collapse = " ")
  # Extract the first non-empty text response from reason1_acc1_txt
- firstcase <- VOTOdata$reason1_acc1_txt[grepl("[a-zA-Z]", VOTOdata$reason1_acc1_txt)][1]
+ firstcase <- VOTOdata_clean$reason1_acc1_txt[grepl("[a-zA-Z]", VOTOdata_clean$reason1_acc1_txt)][1]
  
  # Display the result
  print(firstcase)

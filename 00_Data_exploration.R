@@ -14,6 +14,8 @@ VOTOdata <- read_sav("Datasets/1231_VOTO_CumulativeDataset_Data_scrutin_v1.0.0.s
 # Select variables containing "txt"
 txt_vars <- VOTOdata %>% dplyr::select(contains("txt"))
 
+VOTOdata$vo
+
 # Get a summary overview
 summary(txt_vars)
 
@@ -50,4 +52,11 @@ for (var_name in names(txt_vars)) {
 print(result)
 
 
+# Fälle im Datensatz VOTOdata auswählen, bei denen vote_1 == 3 ist
+selected_cases <- VOTOdata %>%
+  filter(vote_1 == 3) %>%         # filtere nach vote_1 == 3
+  select(reason1_acc1_txt)        # wähle nur die Variable reason1_acc1_txt aus
+
+# Zeige die Werte an
+print(selected_cases)
 
