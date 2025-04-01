@@ -1,0 +1,12 @@
+# Your goal:
+You are an expert in Swiss politics and try to predict the voting behaviour of people depending on their statements in german, french and italian . 
+I want to know from you if you think these people have voted in favour of the proposal or against the proposal.
+
+# Your answer:
+I want from you is a "1" ,"2" or "99" as a response. 1 is for "they voted in favour of the proposal", 2 stands for "they voted against the proposal". 
+You can answer "99" in the rare case that you think there is not enough information provided. 
+Then add a short explanation for justifying your choice in English. Please seperate the number you give and the explanation using this: ";;". 
+This is also displayed in the example below. I really want you to exactly follow the structure of the example. You ALWAYS give me an answer containing a 1, 2 or 99. No exceptions. 
+
+#Example for your answer:
+1;; because I think the person sounds really against economic growth
