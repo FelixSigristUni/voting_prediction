@@ -10,7 +10,7 @@ VOTOdata <- readRDS("Datasets/VOTOdata_clean.rds")
 APIkey <- readLines("openai_key.txt")
 
 # Step 3: Load prompt text
-questiontext <- paste(readLines("prompt1.txt"), collapse = " ")
+questiontext <- paste(readLines("prompt2.txt"), collapse = " ")
 
 # Step 4: Select relevant variables
 text_vars <- VOTOdata %>% select(where(is.character)) %>% names()
@@ -68,8 +68,12 @@ for (i in seq_len(nrow(valid_data))) {
 
 # Step 8: Combine everything into the final results dataframe
 results_df <- valid_data %>%
-  mutate(chatgpt_response = chatgpt_responses) %>%
-  select(id, chatgpt_response, vote_1, reason1_acc1_txt, reason2_acc1_txt)
+  mutate(
+    chatgpt_response = chatgpt_responses,
+    chatgpt_vote = as.integer(str_extract(chatgpt_responses, "^[0-9]+"))  # Extrahiert die Zahl vor ;;
+  ) %>%
+  select(id, chatgpt_response, chatgpt_vote, vote_1, reason1_acc1_txt, reason2_acc1_txt)
+
 
 # Step 9: Optional - Save to CSV
 write.csv(results_df, "chatgpt_analysis_results_combined.csv", row.names = FALSE)
