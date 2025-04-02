@@ -3,6 +3,9 @@ library(dplyr)
 library(httr)
 library(stringr)
 
+# Specify the number of cases to process
+n_cases <- 100
+
 # Step 1: Load the cleaned .rds dataset
 VOTOdata <- readRDS("Datasets/VOTOdata_clean.rds")
 
@@ -18,31 +21,44 @@ vote_vars <- c("vote_1", "vote_2", "vote_3", "vote_4", "vote_5")
 vars_to_keep <- c("id", vote_vars, text_vars)
 VOTOdata_clean <- VOTOdata %>% select(any_of(vars_to_keep))
 
-# Step 5: Filter for cases where both reason1 AND reason2 have text
+# Step 5: Filter cases where at least one complete pair of open responses exists:
+# either both reason1_acc1_txt and reason2_acc1_txt have text
+# or both reason1_den1_txt and reason2_den1_txt have text.
 valid_data <- VOTOdata_clean %>%
   filter(
-    grepl("[a-zA-Z]", reason1_acc1_txt),
-    grepl("[a-zA-Z]", reason2_acc1_txt)
+    (grepl("[a-zA-Z]", reason1_acc1_txt) & grepl("[a-zA-Z]", reason2_acc1_txt)) |
+      (grepl("[a-zA-Z]", reason1_den1_txt) & grepl("[a-zA-Z]", reason2_den1_txt))
   ) %>%
-  select(id, vote_1, reason1_acc1_txt, reason2_acc1_txt) %>%
-  slice_head(n = 10)  # adjust to 100 later
+  select(id, vote_1, reason1_acc1_txt, reason2_acc1_txt, reason1_den1_txt, reason2_den1_txt) %>%
+  slice_head(n = n_cases)
 
-# Step 6: Initialize vector for responses
+# Step 6: Initialize a vector to store ChatGPT responses
 chatgpt_responses <- vector("character", length = nrow(valid_data))
 
-# Step 7: Loop through each case and send combined text
+# Step 7: Loop through each case and send the combined text to the API
 for (i in seq_len(nrow(valid_data))) {
-  reason1 <- valid_data$reason1_acc1_txt[i]
-  reason2 <- valid_data$reason2_acc1_txt[i]
+  combined_text <- ""
   
-  # Combine reasons into one text input for the prompt
-  full_text <- paste(
-    "Reason 1:", reason1, "\n",
-    "Reason 2:", reason2
-  )
+  # If the acc pair responses are available, add them to the combined text
+  if (grepl("[a-zA-Z]", valid_data$reason1_acc1_txt[i]) & grepl("[a-zA-Z]", valid_data$reason2_acc1_txt[i])) {
+    combined_text <- paste0("Acc Pair - Reason 1: ", valid_data$reason1_acc1_txt[i], "\n",
+                            "Acc Pair - Reason 2: ", valid_data$reason2_acc1_txt[i])
+  }
   
-  question <- paste(questiontext, "This is case", i, ":\n", full_text)
+  # If the den pair responses are available, add them (with a newline separator if needed)
+  if (grepl("[a-zA-Z]", valid_data$reason1_den1_txt[i]) & grepl("[a-zA-Z]", valid_data$reason2_den1_txt[i])) {
+    if (nchar(combined_text) > 0) {
+      combined_text <- paste(combined_text, "\n")
+    }
+    combined_text <- paste0(combined_text,
+                            "Den Pair - Reason 1: ", valid_data$reason1_den1_txt[i], "\n",
+                            "Den Pair - Reason 2: ", valid_data$reason2_den1_txt[i])
+  }
   
+  # Build the final prompt with the combined text
+  question <- paste(questiontext, "This is case", i, ":\n", combined_text)
+  
+  # API call to get ChatGPT's response
   r <- httr::POST(
     url = "https://api.openai.com/v1/chat/completions",
     content_type("application/json"),
@@ -56,7 +72,7 @@ for (i in seq_len(nrow(valid_data))) {
     encode = "json"
   )
   
-  # Save response or error message
+  # Save the response or an error message
   chatgpt_responses[i] <- tryCatch({
     content(r)$choices[[1]]$message$content
   }, error = function(e) {
@@ -70,14 +86,13 @@ for (i in seq_len(nrow(valid_data))) {
 results_df <- valid_data %>%
   mutate(
     chatgpt_response = chatgpt_responses,
-    chatgpt_vote = as.integer(str_extract(chatgpt_responses, "^[0-9]+"))  # Extrahiert die Zahl vor ;;
+    chatgpt_vote = as.integer(str_extract(chatgpt_responses, "^[0-9]+"))
   ) %>%
-  select(id, chatgpt_response, chatgpt_vote, vote_1, reason1_acc1_txt, reason2_acc1_txt)
+  select(id, chatgpt_response, chatgpt_vote, vote_1, 
+         reason1_acc1_txt, reason2_acc1_txt, reason1_den1_txt, reason2_den1_txt)
 
-
-# Step 9: Optional - Save to CSV
+# Step 9: Optionally save the results to a CSV file
 write.csv(results_df, "chatgpt_analysis_results_combined.csv", row.names = FALSE)
 
-# View a preview
+# Print a preview of the results dataframe
 print(head(results_df))
-
