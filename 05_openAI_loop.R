@@ -3,8 +3,9 @@ library(dplyr)
 library(httr)
 library(stringr)
 
-# Specify the number of cases to process
-n_cases <- 1000
+# Specify the number of cases to process and the round number
+n_cases <- 10       # Change to 1000 for actual use
+round_num <- 1      # Set to 1 for the first round; 2 (or higher) for subsequent rounds
 
 # Step 1: Load the cleaned .rds dataset
 VOTOdata <- readRDS("Datasets/VOTOdata_clean.rds")
@@ -29,8 +30,17 @@ valid_data <- VOTOdata_clean %>%
     (grepl("[a-zA-Z]", reason1_acc1_txt) & grepl("[a-zA-Z]", reason2_acc1_txt)) |
       (grepl("[a-zA-Z]", reason1_den1_txt) & grepl("[a-zA-Z]", reason2_den1_txt))
   ) %>%
-  select(id, vote_1, reason1_acc1_txt, reason2_acc1_txt, reason1_den1_txt, reason2_den1_txt) %>%
-  slice_head(n = n_cases)
+  select(id, vote_1, reason1_acc1_txt, reason2_acc1_txt, reason1_den1_txt, reason2_den1_txt)
+
+# For rounds beyond the first, exclude cases that have already been processed
+if(round_num > 1 && file.exists("chatgpt_analysis_results_combined.csv")){
+  previous_results <- read.csv("chatgpt_analysis_results_combined.csv", stringsAsFactors = FALSE)
+  valid_data <- valid_data %>% filter(!id %in% previous_results$id)
+}
+
+# Randomly sample n_cases cases from the remaining valid data
+set.seed(123)  # Optionally set a seed for reproducibility
+valid_data <- valid_data %>% sample_n(n_cases)
 
 # Step 6: Initialize a vector to store ChatGPT responses
 chatgpt_responses <- vector("character", length = nrow(valid_data))
@@ -92,7 +102,14 @@ results_df <- valid_data %>%
          reason1_acc1_txt, reason2_acc1_txt, reason1_den1_txt, reason2_den1_txt)
 
 # Step 9: Optionally save the results to a CSV file
-write.csv(results_df, "chatgpt_analysis_results_combined.csv", row.names = FALSE)
+# For round > 1, append new results to the existing file.
+if(round_num > 1 && file.exists("chatgpt_analysis_results_combined.csv")){
+  previous_results <- read.csv("chatgpt_analysis_results_combined.csv", stringsAsFactors = FALSE)
+  final_results <- bind_rows(previous_results, results_df)
+  write.csv(final_results, "chatgpt_analysis_results_combined.csv", row.names = FALSE)
+} else {
+  write.csv(results_df, "chatgpt_analysis_results_combined.csv", row.names = FALSE)
+}
 
 # Print a preview of the results dataframe
 print(head(results_df))
