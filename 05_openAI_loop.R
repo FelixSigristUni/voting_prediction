@@ -4,7 +4,7 @@ library(httr)
 library(stringr)
 
 # Specify the number of cases to process
-n_cases <- 100
+n_cases <- 1000
 
 # Step 1: Load the cleaned .rds dataset
 VOTOdata <- readRDS("Datasets/VOTOdata_clean.rds")
