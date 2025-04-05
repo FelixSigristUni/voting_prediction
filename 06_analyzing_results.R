@@ -86,7 +86,7 @@ metrics_table %>%
 
 
 
-8 
+
 
 
 # An overall accuracy of 77.1% was achieved only using open answers
