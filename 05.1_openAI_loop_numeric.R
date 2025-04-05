@@ -4,7 +4,7 @@ library(httr)
 library(stringr)
 
 # Specify the number of cases to process and the round number
-n_cases <- 10       # Change to 1000 for actual use
+n_cases <- 100       # Change to 1000 for actual use
 round_num <- 1      # Set to 1 for the first round; 2 (or higher) for subsequent rounds
 
 # Step 1: Load the scrutin dataset (.sav file)
