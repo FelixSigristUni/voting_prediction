@@ -4,7 +4,7 @@ library(httr)
 library(stringr)
 
 # Specify the number of cases to process and the round number
-n_cases <- 100       # Change to 1000 for actual use
+n_cases <- 95       # Change to 1000 for actual use
 round_num <- 1      # Set to 1 for the first round; 2 (or higher) for subsequent rounds
 
 # Step 1: Load the scrutin dataset (.sav file)
@@ -13,22 +13,22 @@ voto_data <- read_sav("Datasets/1231_VOTO_CumulativeDataset_Data_scrutin_v1.0.0.
 # Step 2: Load your API key securely from a text file
 APIkey <- readLines("openai_key.txt")
 
-# Step 3: Load your custom prompt text from a TXT file.
-# The TXT file (e.g., "numeric_prompt.txt") should be in the Datasets folder.
+# Step 3: Load your custom prompt text from a TXT file (in the current working directory)
 base_prompt <- paste(readLines("numeric_prompt.txt"), collapse = " ")
 
 # Step 4: Select relevant numeric variables.
-# We select:
+# Variables chosen:
 # - id: Identifier
-# - vote_1: Actual vote decision (for later comparison)
+# - vote_1: Actual vote decision (for recoding turnout)
 # - birthyear: To compute Age
 # - dectime1: Decision Time for proposal 1
-# - lrsp: Political Left-Right placement (numeric scale, e.g. 0 to 10)
-# - income: Household Income (numeric coded groups)
-# - educ: Highest level of Education (numeric code)
-# - trust_1: Trust in the Federal Council (numeric scale 0 to 10)
-# - importance_1: Importance of Voting (numeric scale 0 to 10)
-selected_vars <- c("id", "vote_1", "birthyear", "dectime1", "lrsp", "income", "educ", "trust_1", "importance_1")
+# - lrsp: Political Left-Right placement
+# - income: Household Income
+# - educ: Education level
+# - trust_1: Trust in the Federal Council
+# - importance_1: Importance of Voting
+# - mediause_3: TV Voting Debates Use
+selected_vars <- c("id", "vote_1", "birthyear", "dectime1", "lrsp", "income", "educ", "trust_1", "importance_1", "mediause_3")
 voto_data_numeric <- voto_data %>% select(any_of(selected_vars))
 
 # Step 5: Compute Age from birthyear (if available)
@@ -40,12 +40,12 @@ if("birthyear" %in% names(voto_data_numeric)){
 # Step 6: Recode turnout based on vote_1.
 # According to the codebook for vote_1:
 #   1 = yes (voted), 2 = no (voted), 3 = blank/did not vote.
-# For predicting turnout, we recode:
-#   If vote_1 is 1 or 2, then the person is coded as 1 (voted).
-#   If vote_1 is 3, then the person is coded as 2 (did not vote).
+# Recode as:
+#   voted_flag = 1 if vote_1 is 1 or 2 (voted)
+#   voted_flag = 2 if vote_1 is 3 (did not vote)
 voto_data_numeric <- voto_data_numeric %>%
-  filter(vote_1 %in% c(1,2,3)) %>%
-  mutate(voted_flag = if_else(vote_1 %in% c(1,2), 1, 2))  # 1 = voted, 2 = did not vote
+  filter(vote_1 %in% c(1, 2, 3)) %>%
+  mutate(voted_flag = if_else(vote_1 %in% c(1, 2), 1, 2))
 
 # Step 7: Exclude cases with missing values in key numeric predictors.
 valid_data <- voto_data_numeric %>%
@@ -55,16 +55,14 @@ valid_data <- voto_data_numeric %>%
          !is.na(income),
          !is.na(educ),
          !is.na(trust_1),
-         !is.na(importance_1))
+         !is.na(importance_1),
+         !is.na(mediause_3))
 if("age" %in% names(voto_data_numeric)){
   valid_data <- valid_data %>% filter(!is.na(age))
 }
 
-# Step 8: Stratified sampling to target approximately one third non-voters.
-# Set:
-#   n_non: number of non-voters (voted_flag == 2) ≈ one third of n_cases.
-#   n_voted: remaining cases (voted_flag == 1).
-n_non <- round(n_cases/3)
+# Step 8: Stratified sampling to obtain roughly one third non-voters.
+n_non <- round(n_cases / 3)
 n_voted <- n_cases - n_non
 
 voters <- valid_data %>% filter(voted_flag == 1)
@@ -84,7 +82,7 @@ non_voters_sample <- if(nrow(non_voters) >= n_non) {
 
 valid_data_sample <- bind_rows(voters_sample, non_voters_sample)
 
-# Step 9: For rounds beyond the first, exclude cases that have already been processed.
+# Step 9: For rounds beyond the first, exclude cases already processed.
 prev_filename <- paste0("numeric_api_predictions_SCRUTIN_PROMPT_round", round_num - 1, ".csv")
 if(round_num > 1 && file.exists(prev_filename)){
   previous_results <- read.csv(prev_filename, stringsAsFactors = FALSE)
@@ -100,7 +98,7 @@ api_responses <- vector("character", length = nrow(valid_data_sample))
 
 # Step 12: Loop through each case, build the numeric prompt, and send it to the API.
 for(i in seq_len(nrow(valid_data_sample))){
-  # Build numeric details string; include Age if available.
+  # Build numeric details string. Include Age if available.
   numeric_details <- ""
   if("age" %in% names(valid_data_sample)){
     numeric_details <- paste0("Age = ", valid_data_sample$age[i], "; ")
@@ -111,7 +109,8 @@ for(i in seq_len(nrow(valid_data_sample))){
                             "Income = ", valid_data_sample$income[i], "; ",
                             "Education (educ) = ", valid_data_sample$educ[i], "; ",
                             "Trust in Federal Council (trust_1) = ", valid_data_sample$trust_1[i], "; ",
-                            "Importance of Voting (importance_1) = ", valid_data_sample$importance_1[i], ".")
+                            "Importance of Voting (importance_1) = ", valid_data_sample$importance_1[i], "; ",
+                            "TV Voting Debates Use (mediause_3) = ", valid_data_sample$mediause_3[i], ".")
   
   # Build the final prompt by combining the base prompt with numeric details.
   question <- paste(base_prompt, "This is case", i, ":\n", numeric_details)
@@ -153,7 +152,7 @@ results_df <- valid_data_sample %>%
   )
 
 # Step 14: Save the results to a CSV file with a unique name.
-output_filename <- paste0("numeric_api_predictions_SCRUTIN_PROMPT_round", round_num, ".csv")
+output_filename <- paste0("numeric_api_predictions_SCRUTIN_PROMPT_2round", round_num, ".csv")
 write.csv(results_df, output_filename, row.names = FALSE)
 
 # Print a preview of the results dataframe.
