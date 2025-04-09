@@ -1,0 +1,7 @@
+---
+title: "Voting prediction using llms"
+author: "Felix Sigrist"
+format: pdf
+editor: visual
+---
+
