@@ -155,7 +155,7 @@ results_df <- valid_data_sample %>%
   )
 
 # Step 14: Save the results to a CSV file with a unique name.
-output_filename <- paste0("numeric_api_predictions_SCRUTIN_PROMPT_2round", round_num, ".csv")
+output_filename <- paste0("numericandtext_api_predictions_SCRUTIN_PROMPT_2round", round_num, ".csv")
 write.csv(results_df, output_filename, row.names = FALSE)
 
 # Print a preview of the results dataframe.
