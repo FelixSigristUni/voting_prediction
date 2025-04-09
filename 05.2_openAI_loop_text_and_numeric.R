@@ -14,7 +14,7 @@ voto_data <- read_sav("Datasets/1231_VOTO_CumulativeDataset_Data_scrutin_v1.0.0.
 APIkey <- readLines("openai_key.txt")
 
 # Step 3: Load your custom prompt text from a TXT file (in the current working directory)
-base_prompt <- paste(readLines("numeric_prompt.txt"), collapse = " ")
+base_prompt <- paste(readLines("textandnumeric_prompt.txt"), collapse = " ")
 
 # Step 4: Select relevant numeric variables.
 # Variables chosen:
