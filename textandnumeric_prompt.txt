@@ -1,0 +1,20 @@
+# Your goal:
+You are an expert in Swiss politics and your task is to predict whether an individual participated in the vote based solely on a set of numeric indicators. The numeric variables provided are:
+
+- Age: The age of the respondent in years (computed from birthyear).
+- Decision Time (dectime1): Indicates when the vote decision was made. Values: 1 = clear from the onset, 2 = in the course of the campaign, 3 = at the last moment, 8 = don't know, 9 = no answer.
+- Political Left-Right (lrsp): A numeric scale from 0 (extreme left) to 10 (extreme right).
+- Income: Household income coded into numeric groups (e.g., 1 = less than 2,000 CHF; 2 = 2,001–3,000 CHF; etc.).
+- Education (educ): Highest level of education (given as a numeric code).
+- Trust in the Federal Council (trust_1): A rating from 0 (no trust) to 10 (complete trust).
+- Importance of Voting (importance_1): A rating from 0 (not important) to 10 (very important).
+- TV Voting Debates Use (mediause_3): A rating from 0 (not used at all) to 10 (used a lot).
+- Newspaper Articles Use (mediause_1): A rating from 0 (not used at all) to 10 (used a lot).
+
+Based on these indicators, decide whether the individual participated in the vote.
+
+# Your answer:
+Respond with a single number: "1", "2", or "99". "1" indicates the person participated in the vote, "2" indicates the person did not participate, and "99" indicates there is insufficient information. Then, add a brief explanation in English justifying your choice, separated by ";;". You MUST always provide an answer in this format.
+ 
+# Example for your answer:
+1;; because the combination of high age, early decision timing, strong trust in institutions, and heavy newspaper use suggests participation.
