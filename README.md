@@ -89,5 +89,5 @@ Future enhancements may include:
 This project demonstrates a multi-method approach for predicting individual vote choice in Swiss popular votes. A key advantage of the ChatGPT-based models is their ability to provide natural language explanations for each prediction—a feature that enhances interpretability compared to traditional regression models, which only provide numerical outputs. This repository, along with the accompanying research note, provides a comprehensive overview of the methodology, evaluation, and future research directions.
 
 ---
->>>>>>> ee32b148d7ab46a7b75596859f4f7215a584f0fd
+
 
