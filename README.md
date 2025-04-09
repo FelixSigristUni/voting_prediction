@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# voting_prediction 
-=======
 # Predicting Swiss Voting Outcomes at the Individual Level
 
 This project explores methods to predict how individuals voted—whether in favor (coded as 1) or against (coded as 2)—in Swiss popular votes. All analyses are performed on individual-level data, capturing the nuances of personal voting behavior without any aggregation.
