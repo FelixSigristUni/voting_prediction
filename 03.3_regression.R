@@ -5,47 +5,40 @@ library(pROC)
 library(knitr)
 library(kableExtra)
 
-# Step 1: Load your dataset
+# Step 1: Load the dataset
 data <- read_sav("Datasets/1231_VOTO_CumulativeDataset_Data_scrutin_v1.0.0.sav")
 
-# Step 2: Select and prepare relevant variables
+# Step 2: Keep only strong, significant predictors
 model_data <- data %>%
-  select(vote_1, birthyear, sex, income, educ, lrsp, partya,
+  select(vote_1, birthyear, sex, income, partya,
          typex1, issue1gx1,
-         dectime1, importance_1, trust_1, mediause_3) %>%
+         dectime1, importance_1, trust_1) %>%
   mutate(age = 2020 - birthyear) %>%
   filter(vote_1 %in% c(1, 2),
          !is.na(age),
          !is.na(sex),
          !is.na(income),
-         !is.na(educ),
-         !is.na(lrsp),
          !is.na(partya),
          !is.na(typex1),
          !is.na(issue1gx1),
          !is.na(dectime1),
          !is.na(importance_1),
-         !is.na(trust_1),
-         !is.na(mediause_3)) %>%
+         !is.na(trust_1)) %>%
   mutate(
     vote_1 = factor(vote_1, levels = c(1, 2)),
     sex = as.factor(sex),
     income = as.factor(income),
-    educ = as.factor(educ),
     partya = as.factor(partya),
     typex1 = as.factor(typex1),
     issue1gx1 = as.factor(issue1gx1),
     dectime1 = as.factor(dectime1),
     importance_1 = as.numeric(importance_1),
-    trust_1 = as.numeric(trust_1),
-    mediause_3 = as.numeric(mediause_3),
-    lrsp = as.numeric(lrsp)
+    trust_1 = as.numeric(trust_1)
   )
 
-# Step 3: Build the logistic regression model
-model <- glm(vote_1 ~ age + sex + income + educ + lrsp + partya +
-               typex1 + issue1gx1 +
-               dectime1 + importance_1 + trust_1 + mediause_3,
+# Step 3: Build the improved logistic regression model
+model <- glm(vote_1 ~ age + sex + income + partya +
+               typex1 + issue1gx1 + dectime1 + importance_1 + trust_1,
              data = model_data, family = binomial)
 summary(model)
 
@@ -53,7 +46,7 @@ summary(model)
 model_data <- model_data %>%
   mutate(predicted_prob = predict(model, model_data, type = "response"))
 
-# Step 5: Binary outcome for ROC
+# Step 5: Create binary outcome for ROC
 model_data <- model_data %>%
   mutate(actual_binary = ifelse(vote_1 == "1", 1, 0))
 
@@ -110,11 +103,10 @@ metrics_list <- data.frame(
 
 # Step 9: Display results
 overall_accuracy_table %>%
-  kable(caption = "Overall Accuracy Summary (Refined Model)") %>%
+  kable(caption = "Overall Accuracy Summary (Optimized Model)") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 
 metrics_list %>%
   kable(caption = "Class Metrics: False Positives and False Negatives Percentages") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-
 
