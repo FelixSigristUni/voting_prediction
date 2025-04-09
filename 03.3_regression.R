@@ -67,3 +67,17 @@ print(conf_matrix)
 # Step 8: Genauigkeit berechnen
 accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix) * 100
 cat("Gesamtgenauigkeit:", round(accuracy, 2), "%\n")
+
+# Step 10: Exportiere die Vorhersagen im gewünschten Format
+export_df <- model_data %>%
+  filter(predicted_vote %in% c(0, 1)) %>%   # Nur klare Vorhersagen
+  select(voted_flag, predicted_vote) %>%
+  rename(regression_prediction = predicted_vote)
+
+# Optional: Vorschau
+table(export_df$voted_flag, export_df$regression_prediction)
+
+# Step 11: Speichern als CSV-Datei für externe Analyse
+write.csv(export_df, "numeric_regression_predictions.csv", row.names = FALSE)
+
+
