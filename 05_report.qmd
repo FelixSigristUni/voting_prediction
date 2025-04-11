@@ -1,7 +1,153 @@
 ---
-title: "Voting prediction using llms"
-author: "Felix Sigrist"
-format: pdf
-editor: visual
+title: "Voting prediction using LLMs"
+subtitle: "A Data Analysis using Swiss VOTO data"
+author: 
+  - "Felix Sigrist, felix.sigrist@stud.unilu.ch.com, 19-641-968"
+  - "Supervisor: Andrea de Angelis"
+  - "Number of words: 2200"
+lang: en
+date: today
+date-format: "DD MM YYYY"
+format: 
+  pdf:
+    documentclass: scrreprt
+    number-sections: true
+    toc: true
+    toc-depth: 2
+    lof: true
+    lot: true
+    include-in-header:
+      - text: |
+          \usepackage{authblk}
+          \usepackage{titling}
+fontsize: 12pt
+linestretch: 1.5
+geometry: left=2.5cm,right=2.5cm,top=3cm,bottom=3cm
+bibliography: bibliography.bib
+citeproc: true
+execute:
+  echo: false
+  warning: false
+knitr:
+  opts_chunk:
+    message: false
+lof: true
+lot: true
 ---
 
+# Abstract {.unnumbered}
+
+LOREM IPOSUM
+
+# Introduction
+
+Voting behavior and especially predicting how people vote has long been a central topic in political science. Traditionally, predicting and analyzing voting behavior is carried out using regression-based models. These models use socio-demographic and political predictors to model voting behavior. Due to their quantitative nature they can indicate associations / correlations between variables but do not elucidate the underlying rationale behind an individuals decision. 
+
+In contrast to this, large language models such as ChatGPT made it possible to produce both predictions and explanations for these predictions. This offers a richer and much more interpretable perspective on decision-making when voting. 
+
+This paper compares four different approaches to predict individual vote choice in Swiss popular votes: 
+
+# Literature Review
+
+Previous studies emphasize the role of economic evaluations in voting behavior. Kriesi (2006) highlights the divide between globalization winners and losers, embedded in the political space. This paper extends prior work by examining political knowledge as a moderating factor.
+
+# Theory
+
+Economic voting theory suggests that voters reward or punish incumbents based on economic performance. We hypothesize:
+
+H1: Negative economic evaluations decrease the likelihood of voting for the incumbent.\
+H2: Political knowledge moderates this effect, with informed voters responding more strongly to economic perceptions.
+
+@fig-model presents the theoretical framework.
+
+![Theoretical model](modell.pdf){#fig-model}
+
+# Empirical Analysis
+
+## Data and Descriptive Statistics
+
+We use data from the CSES dataset, focusing on economic evaluations, incumbent support, and controls. Descriptive statistics are summarized in @tbl-stats.
+
+```{r}
+#| results: asis
+#| tbl-cap: "Descriptive Statistics"
+#| label: tbl-stats
+
+library(tidyverse)
+# Load the .RData file
+load("cses_imd.RData")
+data_summary <- cses_imd %>%
+  select(economic_eval_num, incumbent_vote, income_quartile, education_level, political_information) %>%
+  summary()
+
+print(data_summary)
+```
+
+## Methods
+
+We estimate an OLS model and a logistic regression with interaction terms. The dependent variable is voting for the incumbent, and key predictors include economic evaluations and political information.
+
+## Results
+
+OLS results are shown in @tbl-reg.
+
+```{r}
+#| results: asis
+#| label: tbl-reg
+#| tbl-cap: "Regression Results"
+
+ols_model <- lm(
+  incumbent_vote ~ economic_eval_num + income_quartile + education_level + political_information,
+  data = cses_imd
+)
+
+library(stargazer)
+stargazer(ols_model, type = "text")
+```
+
+Logistic regression results explore interaction effects, visualized in @fig-interaction.
+
+```{r}
+#| fig-cap: "Interaction Effects"
+#| label: fig-interaction
+
+logistic_model <- glm(
+  incumbent_vote ~ economic_eval_num * political_information + income_quartile + education_level,
+  data = cses_imd,
+  family = binomial
+)
+
+interaction_pred <- expand.grid(
+  economic_eval_num = c(1, 2, 3),
+  political_information = c("Low Information", "Moderate Information", "High Information"),
+  income_quartile = mean(cses_imd$income_quartile, na.rm = TRUE),
+  education_level = "Medium"
+)
+
+interaction_pred$predicted_vote <- predict(
+  logistic_model,
+  newdata = interaction_pred,
+  type = "response"
+)
+
+library(ggplot2)
+ggplot(interaction_pred, aes(x = factor(economic_eval_num, labels = c("Better", "Same", "Worse")),
+                             y = predicted_vote, color = political_information, group = political_information)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Interaction: Economic Evaluation and Political Information",
+    x = "Economic Evaluation",
+    y = "Predicted Probability",
+    color = "Political Information"
+  ) +
+  theme_minimal()
+```
+
+# Discussion
+
+The results confirm that negative economic perceptions reduce incumbent support. Politically informed voters show a stronger reaction, highlighting the moderating role of knowledge.
+
+# Conclusion
+
+This study supports economic voting theory, emphasizing political information as a critical moderator. Future research should explore additional factors influencing voting behavior.
