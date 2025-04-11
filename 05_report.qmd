@@ -41,11 +41,25 @@ LOREM IPOSUM
 
 # Introduction
 
-Voting behavior and especially predicting how people vote has long been a central topic in political science. Traditionally, predicting and analyzing voting behavior is carried out using regression-based models. These models use socio-demographic and political predictors to model voting behavior. Due to their quantitative nature they can indicate associations / correlations between variables but do not elucidate the underlying rationale behind an individuals decision. 
+Voting behavior and especially predicting how people vote has long been a central topic in political science. Traditionally, predicting and analyzing voting behavior is carried out using regression-based models. These models use socio-demographic and political predictors to model voting behavior. Due to their quantitative nature they can indicate associations / correlations between variables but do not elucidate the underlying rationale behind an individuals decision.
 
-In contrast to this, large language models such as ChatGPT made it possible to produce both predictions and explanations for these predictions. This offers a richer and much more interpretable perspective on decision-making when voting. 
+In contrast to this, large language models such as ChatGPT made it possible to produce both predictions and explanations for these predictions. This offers a richer and much more interpretable perspective on decision-making when voting.
 
-This paper compares four different approaches to predict individual vote choice in Swiss popular votes: 
+This paper compares four different approaches to predict individual vote choice in Swiss popular votes:
+
+1.  **ChatGPT Text Model:** Leverages open-ended text responses to predict whether a voter supported or opposed a proposal. In addition to providing a numeric classification, the model outputs a brief natural language explanation that clarifies the reasoning behind its prediction.
+
+2.  **ChatGPT Numeric Model:** Uses a carefully engineered prompt based solely on structured numeric indicators such as age, decision timing, political orientation, income, education, institutional trust, and media use. The model returns a numeric prediction along with a short textual explanation.
+
+3.  **ChatGPT Combined Model:** Integrates both numeric data and open-ended text inputs to capture a broader context, thus enabling a more nuanced prediction coupled with an explanation.
+
+4.  **Logistic Regression Model:** A classical quantitative approach that employs the same structured predictors as the ChatGPT Numeric and Combined models. This model serves as a baseline; however, it does not incorporate any open text data or provide explanatory output.
+
+In order to conduct these analyses, the "1231 VOTO Cumulative Dataset" was prepared, removing all of the irrelevant variables and cases. This micro-level dataset not only provides all the variables needed to conduct a traditional regression analysis but also provides multiple open text answers which can be used for the LLM-based analyses.
+
+A key innovation of this work is the use of ChatGPTs ability to provide a text-based explanation next to the numeric prediction. This feature makes it possible to not only understand the outcome but also the rationale behind each prediction. The traditional regression model does not offer such qualitative insights.
+
+In the following sections, data sources, variable selection, methodology, model implementation and performance are described before concluding the paper with a discussion of its implications.
 
 # Literature Review
 
