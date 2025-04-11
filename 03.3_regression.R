@@ -3,8 +3,8 @@ library(dplyr)
 library(ggplot2)
 library(pROC)
 
-# Step 1: Daten laden
-data <- read_sav("Datasets/1231_VOTO_CumulativeDataset_Data_scrutin_v1.0.0.sav")
+# Step 1: Load the clean (.rds file)
+voto_data <- readRDS("Datasets/VOTOdata_clean.rds")
 
 # Step 2: Variablen auswählen und filtern
 model_data <- data %>%

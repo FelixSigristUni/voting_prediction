@@ -7,8 +7,8 @@ library(stringr)
 n_cases <- 95       # Change to a higher number (e.g., 1000) for your full run
 round_num <- 1      # Set to 1 for the first round; 2 (or higher) for subsequent rounds
 
-# Step 1: Load the scrutin dataset (.sav file)
-voto_data <- read_sav("Datasets/1231_VOTO_CumulativeDataset_Data_scrutin_v1.0.0.sav")
+# Step 1: Load the clean (.rds file)
+voto_data <- readRDS("Datasets/VOTOdata_clean.rds")
 
 # Step 2: Load your API key securely from a text file
 APIkey <- readLines("openai_key.txt")
