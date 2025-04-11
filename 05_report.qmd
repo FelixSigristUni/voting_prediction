@@ -16,14 +16,10 @@ format:
     toc-depth: 2
     lof: true
     lot: true
-    include-in-header:
-      - text: |
-          \usepackage{authblk}
-          \usepackage{titling}
 fontsize: 12pt
 linestretch: 1.5
 geometry: left=2.5cm,right=2.5cm,top=3cm,bottom=3cm
-bibliography: bibliography.bib
+#bibliography: bibliography.bib
 citeproc: true
 execute:
   echo: false
@@ -39,7 +35,7 @@ lot: true
 
 LOREM IPOSUM
 
-# Introduction
+# 1. Introduction
 
 Voting behavior and especially predicting how people vote has long been a central topic in political science. Traditionally, predicting and analyzing voting behavior is carried out using regression-based models. These models use socio-demographic and political predictors to model voting behavior. Due to their quantitative nature they can indicate associations / correlations between variables but do not elucidate the underlying rationale behind an individuals decision.
 
@@ -61,107 +57,60 @@ A key innovation of this work is the use of ChatGPTs ability to provide a text-b
 
 In the following sections, data sources, variable selection, methodology, model implementation and performance are described before concluding the paper with a discussion of its implications.
 
-# Literature Review
 
-Previous studies emphasize the role of economic evaluations in voting behavior. Kriesi (2006) highlights the divide between globalization winners and losers, embedded in the political space. This paper extends prior work by examining political knowledge as a moderating factor.
 
-# Theory
 
-Economic voting theory suggests that voters reward or punish incumbents based on economic performance. We hypothesize:
+# 2. Data and Methods
+## 2.1 Data Source and Description
+- Description of the scrutin dataset (individual-level data from Swiss popular votes)
+- Key variables included (demographic, political, media use, initiative-related variables)
 
-H1: Negative economic evaluations decrease the likelihood of voting for the incumbent.\
-H2: Political knowledge moderates this effect, with informed voters responding more strongly to economic perceptions.
+## 2.2 Data Preprocessing and Cleaning
+- Steps for cleaning the raw data
+- Variable selection strategy (retaining text variables for the ChatGPT Text Model and numeric variables for the other models)
+- Computation of derived variables (e.g., Age from birthyear)
 
-@fig-model presents the theoretical framework.
+## 2.3 Modeling Approaches
+### 2.3.1 ChatGPT Text Model
+- Input: Open-ended text responses (e.g., reasons for/against voting)
+- Output: Numeric classification (1, 2, or 99) plus a brief explanation
 
-![Theoretical model](modell.pdf){#fig-model}
+### 2.3.2 ChatGPT Numeric Model
+- Input: Structured numeric indicators (e.g., Age, Decision Time, Political Left-Right, Income, Education, Trust, Importance, and Media Use)
+- Output: Numeric prediction with natural language explanation
 
-# Empirical Analysis
+### 2.3.3 ChatGPT Combined Model
+- Input: Integration of numeric indicators with available open-ended text responses for richer context
+- Output: Numeric prediction with explanatory text
 
-## Data and Descriptive Statistics
+### 2.3.4 Logistic Regression Model
+- Input: The same numeric and categorical predictors used in the ChatGPT Numeric Model
+- Output: Predicted probability and classification (without any open text explanation)
 
-We use data from the CSES dataset, focusing on economic evaluations, incumbent support, and controls. Descriptive statistics are summarized in @tbl-stats.
+# 3. Analysis and Results
+## 3.1 Model Evaluation Metrics
+- Explanation of confusion matrices, overall accuracy, false positives, and false negatives
 
-```{r}
-#| results: asis
-#| tbl-cap: "Descriptive Statistics"
-#| label: tbl-stats
+## 3.2 Results for Each Model
+- Results for the ChatGPT Text Model
+- Results for the ChatGPT Numeric Model
+- Results for the ChatGPT Combined Model
+- Results for the Logistic Regression Model
+- Comparative discussion of performance and error metrics
 
-library(tidyverse)
-# Load the .RData file
-load("cses_imd.RData")
-data_summary <- cses_imd %>%
-  select(economic_eval_num, incumbent_vote, income_quartile, education_level, political_information) %>%
-  summary()
+# 4. Discussion
+- Interpretation of the model outcomes
+- Comparison of qualitative (ChatGPT) and quantitative (regression) approaches
+- Discussion of challenges, such as initiative heterogeneity and variable selection
 
-print(data_summary)
-```
+# 5. Conclusion and Future Work
+- Summary of key findings
+- Implications for predicting voting behavior at the individual level
+- Suggestions for further research and potential model improvements
 
-## Methods
+# Appendices (if needed)
+- Additional tables and figures
+- Technical details of data processing and modeling
 
-We estimate an OLS model and a logistic regression with interaction terms. The dependent variable is voting for the incumbent, and key predictors include economic evaluations and political information.
-
-## Results
-
-OLS results are shown in @tbl-reg.
-
-```{r}
-#| results: asis
-#| label: tbl-reg
-#| tbl-cap: "Regression Results"
-
-ols_model <- lm(
-  incumbent_vote ~ economic_eval_num + income_quartile + education_level + political_information,
-  data = cses_imd
-)
-
-library(stargazer)
-stargazer(ols_model, type = "text")
-```
-
-Logistic regression results explore interaction effects, visualized in @fig-interaction.
-
-```{r}
-#| fig-cap: "Interaction Effects"
-#| label: fig-interaction
-
-logistic_model <- glm(
-  incumbent_vote ~ economic_eval_num * political_information + income_quartile + education_level,
-  data = cses_imd,
-  family = binomial
-)
-
-interaction_pred <- expand.grid(
-  economic_eval_num = c(1, 2, 3),
-  political_information = c("Low Information", "Moderate Information", "High Information"),
-  income_quartile = mean(cses_imd$income_quartile, na.rm = TRUE),
-  education_level = "Medium"
-)
-
-interaction_pred$predicted_vote <- predict(
-  logistic_model,
-  newdata = interaction_pred,
-  type = "response"
-)
-
-library(ggplot2)
-ggplot(interaction_pred, aes(x = factor(economic_eval_num, labels = c("Better", "Same", "Worse")),
-                             y = predicted_vote, color = political_information, group = political_information)) +
-  geom_line() +
-  geom_point() +
-  labs(
-    title = "Interaction: Economic Evaluation and Political Information",
-    x = "Economic Evaluation",
-    y = "Predicted Probability",
-    color = "Political Information"
-  ) +
-  theme_minimal()
-```
-
-# Discussion
-
-The results confirm that negative economic perceptions reduce incumbent support. Politically informed voters show a stronger reaction, highlighting the moderating role of knowledge.
-
-# Conclusion
-
-This study supports economic voting theory, emphasizing political information as a critical moderator. Future research should explore additional factors influencing voting behavior.
+# References
+- Any cited data sources or methodological references
