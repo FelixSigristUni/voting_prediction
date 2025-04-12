@@ -10,7 +10,6 @@ date: today
 date-format: "DD MM YYYY"
 format: 
   pdf:
-    documentclass: scrreprt
     number-sections: true
     toc: true
     toc-depth: 2
@@ -125,17 +124,31 @@ In order to make the output of the analyses more interpretable, two varibales we
 
 ## 2.3 Modeling Approaches
 
+Four different model approaches are used in this model in order to prdict individual vote choices. Three approaches test the capabilities of large language models in prediciting voting behavior. Each of the models works with a different type of input, which is explained in the following section. The fourth model, the traditional logistic regression model, serves as a benchmark.
+
 ### 2.3.1 ChatGPT Text Model
+
+The ChatGPT text model only uses the open-ended text responses which were provided by respondends to justify their voting decision. The model receives input in form of written justifications for voting in favor or against a proposal and converts these into a numeric output. The output consists of the values 1 (predicting a vote in favor), 2 (prediciting a vote against) and 99 (not enough information to make a prediction). Additionaly the model also generates a text output explaining the factors influencing its classifying decision. This form of output adds a qualitative dimension which can not be achieved using traditional regression models.
+
+**Overview:**
 
 -   Input: Open-ended text responses (e.g., reasons for/against voting)
 -   Output: Numeric classification (1, 2, or 99) plus a brief explanation
 
 ### 2.3.2 ChatGPT Numeric Model
 
+This model is designed to work with structured data only. It uses all of the numeric variables shown before but no text variables. The model is prompt-engineered to interpret these quantitative measures, returning a numeric prediction with the values 1 (predicting a vote in favor), 2 (prediciting a vote against) and 99 (not enough information to make a prediction). Again, the model also provides a brief explanation for its prediction. The goal of this approach is to showcase the potential of LLMs in the transformation of quantitative into both a predicion and a qualitative insight.
+
+**Overview:**
+
 -   Input: Structured numeric indicators (e.g., Age, Decision Time, Political Left-Right, Income, Education, Trust, Importance, and Media Use)
 -   Output: Numeric prediction with natural language explanation
 
 ### 2.3.3 ChatGPT Combined Model
+
+This model is a combination of the two first models. This model integrates both the qualitative open-ended text responses and the numeric indicators. By combining the richness of textual information together with quantitative measures, this model tries to capture a more holistic view of factors that determine voting behavior. Like the other two LLM based approaches the output is numeric with the values 1 (predicting a vote in favor), 2 (prediciting a vote against) and 99 (not enough information to make a prediction) aswell as textual in form of a brief explanation for its prediction.
+
+**Overview:**
 
 -   Input: Integration of numeric indicators with available open-ended text responses for richer context
 -   Output: Numeric prediction with explanatory text
