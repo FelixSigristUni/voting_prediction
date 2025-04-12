@@ -24,7 +24,7 @@ heatmap_plot <- ggplot(confusion_df, aes(x = Actual, y = Predicted, fill = Freq)
   geom_tile(color = "black") +
   geom_text(aes(label = Freq), color = "white", size = 6) +
   scale_fill_gradient(low = "blue", high = "red") +
-  labs(title = "Confusion Matrix: API Prediction vs. Actual Turnout",
+  labs(title = "Confusion Matrix: numeric LLM API Prediction vs. Actual Turnout",
        x = "Actual Turnout (voted_flag)",
        y = "API Predicted Turnout (api_vote)") +
   theme_minimal()
