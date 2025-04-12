@@ -25,7 +25,7 @@ heatmap_plot <- ggplot(confusion_df, aes(x = Actual, y = Predicted, fill = Freq)
   geom_tile(color = "black") +
   geom_text(aes(label = Freq), color = "white", size = 6) +
   scale_fill_gradient(low = "blue", high = "red") +
-  labs(title = "Confusion Matrix: ChatGPT Prediction vs. Actual Vote",
+  labs(title = "Confusion Matrix: Text only LLM Prediction vs. Actual Vote",
        x = "Actual Vote (vote_1)",
        y = "ChatGPT Predicted Vote (chatgpt_vote)") +
   theme_minimal()
@@ -88,4 +88,4 @@ metrics_table %>%
 
 
 
-# An overall accuracy of 77.1% was achieved only using open answers
+# An overall accuracy of 74.3% was achieved only using open answers
