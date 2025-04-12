@@ -57,60 +57,125 @@ A key innovation of this work is the use of ChatGPTs ability to provide a text-b
 
 In the following sections, data sources, variable selection, methodology, model implementation and performance are described before concluding the paper with a discussion of its implications.
 
-
-
-
 # 2. Data and Methods
+
 ## 2.1 Data Source and Description
-- Description of the scrutin dataset (individual-level data from Swiss popular votes)
-- Key variables included (demographic, political, media use, initiative-related variables)
+
+The data used in this project is from the "1231 VOTO Cumulative Dataset - Scrutin". This dataset was chosen as it provides individual-level post-vote survey data from Swiss citizens collected after federal popular votes. In contrast to other datasets, text answers are included in a non-recoded version which makes it interesting for my analyses. I first wanted to choose the SELECTS dataset but unfortunately its text answers are all recoded.
+
+The VOTO project is a collaboration between FORS, the Centre for Democracy Studies Aarau (ZDA) and other partners. It offers a rich basis for both traditional and large langue model analysis due to its combination of survey data with open-ended text responses.
+
+My original plan, to predict voting and non-voting had to be abandonned due to the lack of responses / open-ended text answers of people that did not vote. The VOTO Dataset only includes open-ended text responses of people who voted. Therefore I changed my plan and decided to predict with different models if someone votes in favor or against a proposal.
+
+Each respondent may have participated in up to five different popular votes. For each vote, the dataset contains:
+
+-   **Voting decision (vote_1):** This variable indicates if the respondent voted in favor of the proposal (1), against the proposal (2) or did not participate in the vote (3).
+
+-   **Proposal title (proposalx):** This variable describes the title of the corresponding proposal. Originally, it was intended to only use respondents refering to a specific vote, but as the number of open-text responses is to few, all of the proposals are taken into consideration.
+
+-   **Open-ended justification (e.g. reason1_acc1_txt):** In different open-ended text anwers, respondents could explain their main and secondary reasons for supporting (reason_1_acc1_txt, reason_2_acc1_txt) or opposing (reason1_den1_txt, reason_2_acc1_txt) the proposal. These text answers were the central variables for my ChatGPT Text Model.
+
+The dataset also contains several numeric variables, which I used for my baseline regression, the ChatGPT numeric model and the ChatGPT text and numeric model.
+
+The variables used are:
+
+-   **birthyear:** Year of birth of the respondent, used to get the age of the respondent
+
+-   **dectime1:** Timing of the decision on what to vote. This nominal variable is coded as follows:
+
+    -   1 = clear from the beginning,
+
+    -   2 = during the campaign,
+
+    -   3 = at the last moment,
+
+    -   8 = don't know,
+
+    -   9 = no answer.
+
+-   **lrsp:** Left-right political self-placement on a 0 (far left) to 10 (far right) scale.
+
+-   **income:** Grouped household income in groups from 1 (less than 2'000 CHF) to 15 (more than 15'000 CHF).
+
+-   **educ:** Educational level, coded from 10 to 60, with increasing levels of education.
+
+-   **trust_1:** Trust in Feder Council (0-10)
+
+-   **importance_1:** Importance of the vote (0-10)
+
+-   **mediause_3:** Use of TV debates (0-10)
+
+-   **mediause_1:** Use of newspaper articles (0-10)
+
+This selection of variables makes the dataset ideal for testing traditional statistical methods such as the regression analysis used here aswell as models using large language models.
 
 ## 2.2 Data Preprocessing and Cleaning
-- Steps for cleaning the raw data
-- Variable selection strategy (retaining text variables for the ChatGPT Text Model and numeric variables for the other models)
-- Computation of derived variables (e.g., Age from birthyear)
+
+The preprocessing and cleaning of the data is designed to align with the requirements of the four different approaches used in this project: Three large language model based approaches (only text, numeric and combined) and the traditional logistic regression model. The objective of the preprocessing was to reduce the dataset in order to work more efficiently, only keeping the variables and cases needed.
+
+Only cases with complete information across all of the selected numeric variables were kept in the dataset. This is to make sure that all models can be evaluated in a consistent manner.
+
+For the analyses using text variables, only respondents who provided at least one non-empty response in one of the selected text varaibles were retained. This ensures that all of the models operate on a meaningful and comparable input.
+
+In order to make the output of the analyses more interpretable, two varibales were created:
+
+-   **age:** Computed as 2020 - birthyear (in the dataset), to get the respondent's age at the time of the dataset's reference point
+
+-   **voted_flag:** Recoded version of vote_1 indicating whether someone voted in favor of the proposal (1) or against the proposal (2).
 
 ## 2.3 Modeling Approaches
+
 ### 2.3.1 ChatGPT Text Model
-- Input: Open-ended text responses (e.g., reasons for/against voting)
-- Output: Numeric classification (1, 2, or 99) plus a brief explanation
+
+-   Input: Open-ended text responses (e.g., reasons for/against voting)
+-   Output: Numeric classification (1, 2, or 99) plus a brief explanation
 
 ### 2.3.2 ChatGPT Numeric Model
-- Input: Structured numeric indicators (e.g., Age, Decision Time, Political Left-Right, Income, Education, Trust, Importance, and Media Use)
-- Output: Numeric prediction with natural language explanation
+
+-   Input: Structured numeric indicators (e.g., Age, Decision Time, Political Left-Right, Income, Education, Trust, Importance, and Media Use)
+-   Output: Numeric prediction with natural language explanation
 
 ### 2.3.3 ChatGPT Combined Model
-- Input: Integration of numeric indicators with available open-ended text responses for richer context
-- Output: Numeric prediction with explanatory text
+
+-   Input: Integration of numeric indicators with available open-ended text responses for richer context
+-   Output: Numeric prediction with explanatory text
 
 ### 2.3.4 Logistic Regression Model
-- Input: The same numeric and categorical predictors used in the ChatGPT Numeric Model
-- Output: Predicted probability and classification (without any open text explanation)
+
+-   Input: The same numeric and categorical predictors used in the ChatGPT Numeric Model
+-   Output: Predicted probability and classification (without any open text explanation)
 
 # 3. Analysis and Results
+
 ## 3.1 Model Evaluation Metrics
-- Explanation of confusion matrices, overall accuracy, false positives, and false negatives
+
+-   Explanation of confusion matrices, overall accuracy, false positives, and false negatives
 
 ## 3.2 Results for Each Model
-- Results for the ChatGPT Text Model
-- Results for the ChatGPT Numeric Model
-- Results for the ChatGPT Combined Model
-- Results for the Logistic Regression Model
-- Comparative discussion of performance and error metrics
+
+-   Results for the ChatGPT Text Model
+-   Results for the ChatGPT Numeric Model
+-   Results for the ChatGPT Combined Model
+-   Results for the Logistic Regression Model
+-   Comparative discussion of performance and error metrics
 
 # 4. Discussion
-- Interpretation of the model outcomes
-- Comparison of qualitative (ChatGPT) and quantitative (regression) approaches
-- Discussion of challenges, such as initiative heterogeneity and variable selection
+
+-   Interpretation of the model outcomes
+-   Comparison of qualitative (ChatGPT) and quantitative (regression) approaches
+-   Discussion of challenges, such as initiative heterogeneity and variable selection
 
 # 5. Conclusion and Future Work
-- Summary of key findings
-- Implications for predicting voting behavior at the individual level
-- Suggestions for further research and potential model improvements
+
+-   Summary of key findings
+-   Implications for predicting voting behavior at the individual level
+-   Suggestions for further research and potential model improvements
 
 # Appendices (if needed)
-- Additional tables and figures
-- Technical details of data processing and modeling
+
+-   Additional tables and figures
+-   Technical details of data processing and modeling
 
 # References
-- Any cited data sources or methodological references
+
+-   Any cited data sources or methodological references
