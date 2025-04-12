@@ -5,7 +5,7 @@ library(knitr)
 library(kableExtra)
 
 # Step 1: Load the results dataset from the numeric API predictions file.
-results_df <- read.csv("numeric_api_predictions_SCRUTIN_PROMPT_round1.csv", stringsAsFactors = FALSE)
+results_df <- read.csv("numeric_prompt_results.csv", stringsAsFactors = FALSE)
 
 # Step 2: Convert the actual turnout (voted_flag) and API predicted turnout (api_vote) to factors.
 results_df <- results_df %>%
