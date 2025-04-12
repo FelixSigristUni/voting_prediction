@@ -4,8 +4,8 @@ library(httr)
 library(stringr)
 
 # Specify the number of cases to process and the round number
-n_cases <- 10       # Change to 1000 for actual use
-round_num <- 1      # Set to 1 for the first round; 2 (or higher) for subsequent rounds
+n_cases <- 1000       # Change to 1000 for actual use
+# round_num <- 1      # Set to 1 for the first round; 2 (or higher) for subsequent rounds
 
 # Step 1: Load the cleaned .rds dataset
 VOTOdata <- readRDS("Datasets/VOTOdata_clean.rds")

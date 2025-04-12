@@ -4,33 +4,25 @@ library(httr)
 library(stringr)
 
 # Specify the number of cases to process and the round number
-n_cases <- 1000       # Change to a higher number (e.g., 1000) for your full run
+n_cases <- 100      # Change to a higher number (e.g., 1000) for your full run
 # round_num <- 1      # Set to 1 for the first round; 2 (or higher) for subsequent rounds
 
-# Step 1: Load the clean (.rds file)
-voto_data <- readRDS("Datasets/VOTOdata_clean.rds")
+# Step 1: Load the pre-filtered dataset for proposal 605
+voto_data <- readRDS("Datasets/VOTOdata_clean_proposal_605.rds")
 
-# Step 2: Load your API key securely from a text file
+# Step 2: Load API key securely from a text file
 APIkey <- readLines("openai_key.txt")
 
-# Step 3: Load your custom prompt text from a TXT file (in the current working directory)
-base_prompt <- paste(readLines("textandnumeric_prompt.txt"), collapse = " ")
+# Step 3: Load custom prompt text from a TXT file
+base_prompt <- paste(readLines("titletextandnumeric_prompt.txt"), collapse = " ")
 
-# Step 4: Select relevant numeric variables.
-# Variables chosen:
-# - id: Identifier
-# - vote_1: Actual vote decision (for recoding turnout)
-# - birthyear: To compute Age
-# - dectime1: Decision Time for proposal 1
-# - lrsp: Political Left-Right placement (numeric scale)
-# - income: Household Income
-# - educ: Education level
-# - trust_1: Trust in the Federal Council
-# - importance_1: Importance of Voting
-# - mediause_3: TV Voting Debates Use
-# - mediause_1: Newspaper Articles Use
-selected_vars <- c("id", "vote_1", "birthyear", "dectime1", "lrsp", "income", "educ", "trust_1", "importance_1", "mediause_3", "mediause_1")
+# Step 4: Select relevant variables
+selected_vars <- c("id", "vote_1", "birthyear", "dectime1", "lrsp", "income", "educ", 
+                   "trust_1", "importance_1", "mediause_3", "mediause_1", "proposalx1")
 voto_data_numeric <- voto_data %>% select(any_of(selected_vars))
+
+# Add proposal title manually (already filtered for 605, so we can hardcode this)
+proposal_title <- "‘Green Economy’ initiative (Proposal 605) – aiming to reduce Switzerland’s ecological footprint by 2050 and promote a circular economy"
 
 # Step 5: Compute Age from birthyear if available.
 if("birthyear" %in% names(voto_data_numeric)){
@@ -38,17 +30,12 @@ if("birthyear" %in% names(voto_data_numeric)){
   voto_data_numeric <- voto_data_numeric %>% mutate(age = current_year - birthyear)
 }
 
-# Step 6: Recode turnout based on vote_1.
-# According to the codebook for vote_1:
-#  1 = yes (voted), 2 = no (voted), 3 = blank/did not vote.
-# Recode as:
-#  voted_flag = 1 if vote_1 is 1 or 2 (voted)
-#  voted_flag = 2 if vote_1 is 3 (did not vote)
+# Step 6: Recode turnout
 voto_data_numeric <- voto_data_numeric %>%
   filter(vote_1 %in% c(1, 2, 3)) %>%
   mutate(voted_flag = if_else(vote_1 %in% c(1, 2), 1, 2))
 
-# Step 7: Exclude cases with missing values in key numeric predictors.
+# Step 7: Exclude cases with missing values
 valid_data <- voto_data_numeric %>%
   filter(!is.na(voted_flag),
          !is.na(dectime1),
@@ -63,7 +50,7 @@ if("age" %in% names(voto_data_numeric)){
   valid_data <- valid_data %>% filter(!is.na(age))
 }
 
-# Step 8: Stratified sampling to obtain roughly one third non-voters.
+# Step 8: Stratified sampling
 n_non <- round(n_cases / 3)
 n_voted <- n_cases - n_non
 
@@ -75,32 +62,29 @@ voters_sample <- if(nrow(voters) >= n_voted) {
 } else {
   voters
 }
-
 non_voters_sample <- if(nrow(non_voters) >= n_non) {
   non_voters %>% sample_n(n_non)
 } else {
   non_voters
 }
-
 valid_data_sample <- bind_rows(voters_sample, non_voters_sample)
 
-# # Step 9: For rounds beyond the first, exclude cases that have already been processed.
+# # Step 9: Exclude already processed cases
 # prev_filename <- paste0("numeric_api_predictions_SCRUTIN_PROMPT_2round", round_num - 1, ".csv")
 # if(round_num > 1 && file.exists(prev_filename)){
 #   previous_results <- read.csv(prev_filename, stringsAsFactors = FALSE)
 #   valid_data_sample <- valid_data_sample %>% filter(!id %in% previous_results$id)
 # }
 
-# Step 10: Randomly sample n_cases from the remaining valid data.
-set.seed(123)  # For reproducibility
+# Step 10: Final sample
+set.seed(123)
 valid_data_sample <- valid_data_sample %>% sample_n(n_cases)
 
-# Step 11: Initialize a vector to store API responses.
+# Step 11: Initialize vector for API responses
 api_responses <- vector("character", length = nrow(valid_data_sample))
 
-# Step 12: Loop through each case, build the numeric prompt, and send it to the API.
+# Step 12: Loop through each case and build the prompt
 for(i in seq_len(nrow(valid_data_sample))){
-  # Build numeric details string, including all chosen predictors.
   numeric_details <- ""
   if("age" %in% names(valid_data_sample)){
     numeric_details <- paste0("Age = ", valid_data_sample$age[i], "; ")
@@ -115,16 +99,18 @@ for(i in seq_len(nrow(valid_data_sample))){
                             "TV Voting Debates Use (mediause_3) = ", valid_data_sample$mediause_3[i], "; ",
                             "Newspaper Articles Use (mediause_1) = ", valid_data_sample$mediause_1[i], ".")
   
-  # Build the final prompt.
-  question <- paste(base_prompt, "This is case", i, ":\n", numeric_details)
+  # Add proposal title to the prompt
+  question <- paste0(base_prompt,
+                     "\n\nProposal: ", proposal_title,
+                     "\n\nThis is case ", i, ":\n", numeric_details)
   
-  # API call to get the numeric prediction.
+  # Send API request
   r <- httr::POST(
     url = "https://api.openai.com/v1/chat/completions",
     content_type("application/json"),
     add_headers(Authorization = paste("Bearer", APIkey)),
     body = list(
-      model = "gpt-4o",  # Adjust model name if necessary.
+      model = "gpt-4o",  # Change if needed
       messages = list(
         list(role = "system", content = question)
       )
@@ -132,7 +118,6 @@ for(i in seq_len(nrow(valid_data_sample))){
     encode = "json"
   )
   
-  # Extract the API response with error handling.
   response_content <- tryCatch({
     content(r)$choices[[1]]$message$content
   }, error = function(e) {
@@ -147,16 +132,14 @@ for(i in seq_len(nrow(valid_data_sample))){
   cat("Finished case", i, "\n")
 }
 
-# Step 13: Combine the API responses with the original valid data sample.
+# Step 13: Combine responses with sample data
 results_df <- valid_data_sample %>%
   mutate(api_response = api_responses,
-         # Extract the first numeric value from the API response.
-         api_vote = as.integer(str_extract(api_responses, "^[0-9]+"))
-  )
+         api_vote = as.integer(str_extract(api_responses, "^[0-9]+")))
 
-# Step 14: Save the results to a CSV file with a unique name.
+# Step 14: Save results
 output_filename <- paste0("numericandtext_api_predictions_SCRUTIN_PROMPT_2round", round_num, ".csv")
 write.csv(results_df, output_filename, row.names = FALSE)
 
-# Print a preview of the results dataframe.
+# Preview results
 print(head(results_df))

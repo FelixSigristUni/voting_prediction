@@ -4,8 +4,8 @@ library(httr)
 library(stringr)
 
 # Specify the number of cases to process and the round number
-n_cases <- 95       # Change to 1000 for actual use
-round_num <- 1      # Set to 1 for the first round; 2 (or higher) for subsequent rounds
+n_cases <- 1000       # Change to 1000 for actual use
+# round_num <- 1      # Set to 1 for the first round; 2 (or higher) for subsequent rounds
 
 # Step 1: Load the clean (.rds file)
 voto_data <- readRDS("Datasets/VOTOdata_clean.rds")
@@ -82,12 +82,12 @@ non_voters_sample <- if(nrow(non_voters) >= n_non) {
 
 valid_data_sample <- bind_rows(voters_sample, non_voters_sample)
 
-# Step 9: For rounds beyond the first, exclude cases already processed.
-prev_filename <- paste0("numeric_api_predictions_SCRUTIN_PROMPT_round", round_num - 1, ".csv")
-if(round_num > 1 && file.exists(prev_filename)){
-  previous_results <- read.csv(prev_filename, stringsAsFactors = FALSE)
-  valid_data_sample <- valid_data_sample %>% filter(!id %in% previous_results$id)
-}
+# # Step 9: For rounds beyond the first, exclude cases already processed.
+# prev_filename <- paste0("numeric_api_predictions_SCRUTIN_PROMPT_round", round_num - 1, ".csv")
+# if(round_num > 1 && file.exists(prev_filename)){
+#   previous_results <- read.csv(prev_filename, stringsAsFactors = FALSE)
+#   valid_data_sample <- valid_data_sample %>% filter(!id %in% previous_results$id)
+# }
 
 # Step 10: Randomly sample n_cases from the remaining valid data.
 set.seed(123)  # For reproducibility
