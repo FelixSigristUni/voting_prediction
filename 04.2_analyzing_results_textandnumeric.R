@@ -5,12 +5,12 @@ library(knitr)
 library(kableExtra)
 
 # Step 1: Load the results dataset from the CSV file.
-results_df <- read.csv("numericandtext_api_predictions_SCRUTIN_PROMPT_2round1.csv", stringsAsFactors = FALSE)
+results_df <- read.csv("textandnumeric_results.csv", stringsAsFactors = FALSE)
 
 # Step 2: Convert the actual turnout (voted_flag) and API predicted turnout (api_vote) to factors.
 results_df <- results_df %>%
-  mutate(voted_flag = as.factor(voted_flag),
-         api_vote = as.factor(api_vote))
+  mutate(voted_flag = as.factor(vote_1),
+         api_vote = as.factor(chatgpt_vote))
 
 # Step 3: Create the confusion matrix comparing Actual (voted_flag) vs. Predicted (api_vote).
 confusion_matrix <- table(Actual = results_df$voted_flag, Predicted = results_df$api_vote)
@@ -24,7 +24,7 @@ heatmap_plot <- ggplot(confusion_df, aes(x = Actual, y = Predicted, fill = Freq)
   geom_tile(color = "black") +
   geom_text(aes(label = Freq), color = "white", size = 6) +
   scale_fill_gradient(low = "blue", high = "red") +
-  labs(title = "Confusion Matrix: API Prediction vs. Actual Turnout",
+  labs(title = "Confusion Matrix: textandnumeric Prediction vs. Actual Turnout",
        x = "Actual Turnout (voted_flag)",
        y = "API Predicted Turnout (api_vote)") +
   theme_minimal()
