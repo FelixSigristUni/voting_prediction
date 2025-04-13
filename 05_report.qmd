@@ -1,46 +1,38 @@
 ---
-title: |
-  Voting Prediction Using LLMs  
-  \vspace{0.5em}
-  \large A Data Analysis Using Swiss VOTO Data
-
-author: |
-  Felix Sigrist \\
-  \texttt{felix.sigrist@stud.unilu.ch.com} \\
-  Student ID: 19-641-968 \\
-  Supervisor: Andrea de Angelis \\
-  Number of words: 2200
-
+title: "Voting prediction using LLMs"
+subtitle: "A Data Analysis using Swiss VOTO data"
+author: 
+  - "Felix Sigrist, felix.sigrist@stud.unilu.ch.com, 19-641-968"
+  - "Supervisor: Andrea de Angelis"
+  - "Number of words: 2200"
 lang: en
 date: today
 date-format: "D. MMMM YYYY"
-
-format:
+format: 
   pdf:
     documentclass: scrreprt
     number-sections: true
     toc: true
     toc-depth: 2
-    lof: true
-    lot: true
+    lof: false
+    lot: false
     include-in-header:
       - text: |
           \usepackage{authblk}
           \usepackage{titling}
-    fontsize: 12pt
-    linestretch: 1.5
-    geometry: left=2cm,right=2cm,top=2cm,bottom=2cm
-
+fontsize: 12pt
+linestretch: 1.5
+geometry: left=2cm,right=2cm,top=2cm,bottom=2cm
 bibliography: bibliography.bib
 citeproc: true
-
 execute:
   echo: false
   warning: false
-
 knitr:
   opts_chunk:
     message: false
+lof: false
+lot: false
 ---
 
 # Abstract {.unnumbered}
