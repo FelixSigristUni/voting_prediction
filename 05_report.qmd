@@ -164,7 +164,11 @@ In order for it to serve as a reference model, this logistic regression model us
 
 ## 3.1 Model Evaluation Metrics
 
--   Explanation of confusion matrices, overall accuracy, false positives, and false negatives
+To evaluate the performance of the different models, I used a standardized evaluation script for all of the models. The actual vote (vote_1) of each respondent as well as the predicted vote from the model were first converted into factors in order to be able to construct a confusion matrix. This matrix compares the actual responses with the predictions and provides an overview over correct and incorrect classifications.
+
+For better visibility, the confusion matrix was then visualized as a heatmap using ggplot2, which shows the frequencies of correct classifications / predictions alongside misclassifications. The main metric to evaluate the models is overall accuracy, which is computed by summing the correct predictions and putting them in relation with the total number of cases. Although overall accuracy is a great metric, it needs to be accompanied by false positive and false negative percentages as otherwise the classification performance of each model can not be properly evaluated.
+
+These evaluation results are presented in a systematic order below, in order to highlight each models predictive strengths and possible weaknesses.
 
 ## 3.2 Results for Each Model
 
