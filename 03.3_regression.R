@@ -7,7 +7,7 @@ library(pROC)
 voto_data <- readRDS("Datasets/VOTOdata_clean.rds")
 
 # Step 2: Variablen auswählen und filtern
-model_data <- data %>%
+model_data <- voto_data %>%
   select(vote_1, birthyear, dectime1, lrsp, income, educ,
          trust_1, importance_1, mediause_3) %>%
   mutate(age = 2020 - birthyear) %>%
