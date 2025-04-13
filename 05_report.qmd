@@ -155,6 +155,8 @@ This model is a combination of the two first models. This model integrates both 
 
 ### 2.3.4 Logistic Regression Model
 
+In order for it to serve as a reference model, this logistic regression model uses the same set of numeric variables as the ChatGPT Numeric Model and as the ChatGPT Combined Model. This statistical approach computes predicted probabilities and generates a classification based on the relationships between the independent variables and the dependent variable. As in the ChatGPT numeric Model, no input in form of text is provided. In this case, this would be impossible to do. Although this model does not provide any type of qualitative insight, logistic regression offers a well-established framework which enables a robust quantitative benchmark in order to evaluate the performance of the other models in this project.
+
 -   Input: The same numeric and categorical predictors used in the ChatGPT Numeric Model
 -   Output: Predicted probability and classification (without any open text explanation)
 
