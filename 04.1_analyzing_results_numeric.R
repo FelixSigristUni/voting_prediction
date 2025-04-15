@@ -9,7 +9,7 @@ results_df <- read.csv("numeric_prompt_results.csv", stringsAsFactors = FALSE)
 
 # Step 2: Convert the actual turnout (voted_flag) and API predicted turnout (api_vote) to factors.
 results_df <- results_df %>%
-  mutate(voted_flag = as.factor(voted_flag),
+  mutate(voted_flag = as.factor(vote_1),
          api_vote = as.factor(api_vote))
 
 # Step 3: Create the confusion matrix comparing actual (voted_flag) vs. predicted (api_vote)

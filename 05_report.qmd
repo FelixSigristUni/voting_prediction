@@ -179,6 +179,8 @@ These evaluation results are presented in a systematic order below, in order to 
 
 ### 3.2.1 Results for the ChatGPT Text Model
 
+![](results_safe/textonlyheatmap.jpeg)
+
 The ChatGPT Text model, which bases its predictions only on the open-ended text input, achieved an overall accuracy of 74.3%. The heatmap (figure above) shows that the model correctly classifies most of the respondents based on their text input. However, the heatmap also displays some misclassifications.
 
 From the error metrics, class 1 (voting in favor) shows a false positive rate of 5.4% and a false negative rate of 15.9%. This indicates that while the model sometimes confuses genuine "yes" votes with "no" votes, it more frequently fails to recognize some actual "yes" votes. In contrast, class 2 (voting against) exhibits a 10.4% false positive rate and a 9.8% false negative rate, which is a more balanced distribution of errors. Still, also here there is room for improvement.
@@ -187,11 +189,15 @@ These results suggest that textual inputs alone can capture valuable signals reg
 
 ### 3.2.2 Results for the ChatGPT Numeric Model
 
-The ChatGPT Numeric Model, which only relies on numeric indicators such as age, political orientation and other demographic variables, achieved an overall accuracy of 47.65%. The heatmap displays that the model struggles to classify many respondents voting behavior suggesting that the LLM can not base its predicitions only on numerical input.
+![](results_safe/numericonlyheatmap.jpeg)
 
-From the error metrics, class 1 (voting in favor) shows a false positive rate of 8.31% and a false negative rate of 23.82%. This implies that the model mislabels some of the "no" votes as "yes" votes but far more often misclassifies actual "yes" votes. These figures highlight the limitations of my model which only provides numerical input and no further explanation regarding the topic of the proposals which is voted on etc.
+The ChatGPT Numeric Model, which only relies on numeric indicators such as age, political orientation and other demographic variables, achieved an overall accuracy of 50.7%. The heatmap displays that the model struggles to classify many respondents’ voting behavior, suggesting that the LLM cannot base its predictions solely on numerical input.
+
+From the error metrics, class 1 (voting in favor) shows a false positive rate of 24.2% and a false negative rate of 19%. This implies that the model mislabels some of the “no” votes as “yes” votes but more often fails to correctly identify actual “yes” votes. These figures highlight the limitations of my model, which only provides numerical input and no further explanation regarding the topic of the proposals being voted on.
 
 ### 3.2.3 Results for the ChatGPT Combined Model
+
+![](confusion_matrix_plot_numeric.png){width="100%"}
 
 This model, which combines both open-ended textual justifications aswell as numeric indicators achieved an overall accuracy of 83.2%. As shown in the heatmap above, correct classifications cluster along the main diagonal of the confusion matrix, which highlights that the combination of qualitative and quantitative data enhances the model's predictive performance.
 
@@ -201,13 +207,25 @@ Overall, these results indicate that combining numerical and textual input offer
 
 ### 3.2.4 Results for the Logistic Regression Model
 
+LOREM Iposum
+
 -   Comparative discussion of performance and error metrics
 
 # 4. Discussion
 
--   Interpretation of the model outcomes
--   Comparison of qualitative (ChatGPT) and quantitative (regression) approaches
--   Discussion of challenges, such as initiative heterogeneity and variable selection
+The model outcomes provide an insightful view into individual voting behavior by juxtaposing traditional quantitative methods against innovative qualitative approaches harnessing large language models. The analysis focused on predicting whether respondents voted for or against a proposal, with four distinct approaches: a ChatGPT Text Model, a ChatGPT Numeric Model, a ChatGPT Combined Model, and a traditional logistic regression model.
+
+Interpretation of the outcomes from the LLM-based approaches reveals that textual input offers valuable qualitative context. The ChatGPT Text Model performs moderately well—its ability to parse open-ended responses and provide both numeric classifications and explanatory narratives enables it to capture nuanced motivations behind a vote. However, its reliance on language introduces potential ambiguity; respondents with subtle or less explicit justifications occasionally lead to misclassification. In contrast, the ChatGPT Numeric Model, which depends solely on structured variables like age, decision time, and income, exhibits lower predictive power. This result underscores the limitations of relying exclusively on quantitative indicators, as some contextual elements of voter decisions are not fully captured by numeric data alone.
+
+The ChatGPT Combined Model, which integrates both numeric and textual inputs, emerges as the most robust approach, achieving the highest overall accuracy. By converging quantitative details with the rich, unstructured insights derived from textual responses, this method effectively mitigates errors observed in the isolated models. The combined approach’s capacity to provide a dual output—both a numeric vote prediction and a supplementary explanation—facilitates a deeper understanding of the inherent decision-making process. This interpretative advantage highlights that integrating multiple data types enhances the ability to discern complex social phenomena like voting behavior.
+
+When compared to these qualitative models, the logistic regression model—while serving as a well-established quantitative benchmark—does not offer the same level of interpretability. Although logistic regression demonstrates a reasonable degree of predictive power using variables such as age, income, trust, and the importance of voting, its output is confined to probability estimates and classification. It lacks any accompanying qualitative insight into the rationale behind a vote, making it less useful for exploratory purposes or for understanding the subjective factors driving political behavior.
+
+Several challenges emerged throughout this study. Initiative heterogeneity, for instance, represents a significant hurdle. Proposals varied widely in their substance, context, and public appeal. Such heterogeneity can introduce inconsistencies in both textual responses and numeric predictors, thereby complicating the modeling process. It becomes difficult for any single model to comprehensively capture all the factors influencing the vote, and certain initiatives might be misclassified simply because their unique context was not fully represented in the predictor variables.
+
+Variable selection further compounds these challenges. Although the dataset includes a diverse array of indicators—ranging from socio-demographic factors to media use and trust—it remains a nontrivial task to identify which variables are most influential for different subsets of initiatives. The choice of variables for each model directly affects performance; for instance, while some predictors perform well in quantitative models, they may not add significant value to an LLM when unstructured text is available.
+
+In conclusion, the study illustrates that models integrating qualitative text with quantitative data (as in the Combined Model) not only improve predictive performance but also provide richer interpretative insights into voter behavior. Nonetheless, challenges such as initiative heterogeneity and the complexities involved in variable selection persist, indicating fruitful directions for future research. Enhancing these models by incorporating additional context-specific variables or refining the selection process could further elucidate the complex dynamics behind individual voting decisions.
 
 # 5. Conclusion and Future Work
 

@@ -9,7 +9,7 @@ results_df <- read.csv("numeric_regression_predictions.csv", stringsAsFactors = 
 
 # Step 2: Konvertiere tatsächliche und vorhergesagte Werte in Faktoren
 results_df <- results_df %>%
-  mutate(voted_flag = as.factor(voted_flag),
+  mutate(voted_flag = as.factor(vote_1),
          regression_prediction = as.factor(regression_prediction))
 
 # Step 3: Erstelle die Konfusionsmatrix

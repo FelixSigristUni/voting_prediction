@@ -6,78 +6,65 @@ library(pROC)
 # Step 1: Load the clean (.rds file)
 voto_data <- readRDS("Datasets/VOTOdata_clean.rds")
 
-# Step 2: Variablen auswählen und filtern
+# Step 2: Select only the relevant variables and filter out any cases where vote_1 is not 1 or 2.
+# Also, compute age from birthyear.
 model_data <- voto_data %>%
-  select(vote_1, birthyear, dectime1, lrsp, income, educ,
-         trust_1, importance_1, mediause_3) %>%
+  select(vote_1, birthyear, income, trust_1, importance_1) %>%
   mutate(age = 2020 - birthyear) %>%
   filter(vote_1 %in% c(1, 2),
          !is.na(age),
-         !is.na(dectime1),
-         !is.na(lrsp),
          !is.na(income),
-         !is.na(educ),
          !is.na(trust_1),
-         !is.na(importance_1),
-         !is.na(mediause_3)) %>%
+         !is.na(importance_1)) %>%
   mutate(
-    voted_flag = ifelse(vote_1 == 1, 1, 0),
-    dectime_dummy = ifelse(dectime1 %in% c(12, 13), 1, 0),  # 1 = Spätentscheider, 0 = andere
-    lrsp = as.numeric(lrsp),
     income = as.numeric(income),
-    educ = as.numeric(educ),
     trust_1 = as.numeric(trust_1),
-    importance_1 = as.numeric(importance_1),
-    mediause_3 = as.numeric(mediause_3)
+    importance_1 = as.numeric(importance_1)
   )
 
-# Step 3: Regressionsmodell bauen
-model <- glm(voted_flag ~ age + dectime_dummy + lrsp + income + educ +
-               trust_1 + importance_1 + mediause_3,
+# Step 3: Build the logistic regression model using only the predictors that help.
+model <- glm(as.factor(vote_1) ~ age + income + trust_1 + importance_1,
              data = model_data, family = binomial)
-
 summary(model)
 
-# Step 4: Vorhersagewahrscheinlichkeiten berechnen
+# Step 4: Calculate predicted probabilities.
 model_data <- model_data %>%
   mutate(predicted_prob = predict(model, model_data, type = "response"))
 
-# Step 5: ROC & optimaler Schwellenwert
-roc_obj <- roc(model_data$voted_flag, model_data$predicted_prob)
+# Step 5: Perform ROC analysis and determine the optimal threshold (using Youden's index).
+roc_obj <- roc(model_data$vote_1, model_data$predicted_prob)
 optimal_threshold <- coords(roc_obj, "best", ret = "threshold", best.method = "youden")[[1]]
-cat("Optimaler Schwellenwert (Youden):", optimal_threshold, "\n")
+cat("Optimal threshold (Youden):", optimal_threshold, "\n")
 
-# Step 6: Klassifikation mit Delta-Bereich
+# Step 6: Classify predictions with a small delta range for uncertainty.
 delta <- 0.05
 model_data <- model_data %>%
   mutate(predicted_vote = case_when(
     predicted_prob >= (optimal_threshold + delta) ~ 1,
-    predicted_prob <= (optimal_threshold - delta) ~ 0,
-    TRUE ~ 99
+    predicted_prob <= (optimal_threshold - delta) ~ 2,
+    TRUE ~ 99  # Uncertain predictions are coded as 99.
   ))
 
-# Step 7: Bewertung nur für sichere Vorhersagen
+# Step 7: Evaluate only the clear predictions (predicted_vote equal to 1 or 2).
 eval_data <- model_data %>%
-  filter(predicted_vote %in% c(0, 1))
+  filter(predicted_vote %in% c(1, 2))
 
-conf_matrix <- table(Actual = eval_data$voted_flag, Predicted = eval_data$predicted_vote)
-print("Konfusionsmatrix:")
+conf_matrix <- table(Actual = eval_data$vote_1, Predicted = eval_data$predicted_vote)
+print("Confusion matrix:")
 print(conf_matrix)
 
-# Step 8: Genauigkeit berechnen
+# Step 8: Calculate overall accuracy.
 accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix) * 100
-cat("Gesamtgenauigkeit:", round(accuracy, 2), "%\n")
+cat("Overall accuracy:", round(accuracy, 2), "%\n")
 
-# Step 10: Exportiere die Vorhersagen im gewünschten Format
+# Step 9: Export predictions in the desired format.
 export_df <- model_data %>%
-  filter(predicted_vote %in% c(0, 1)) %>%   # Nur klare Vorhersagen
-  select(voted_flag, predicted_vote) %>%
+  filter(predicted_vote %in% c(1, 2)) %>%   # Only clear predictions are exported
+  select(vote_1, predicted_vote) %>%
   rename(regression_prediction = predicted_vote)
 
-# Optional: Vorschau
-table(export_df$voted_flag, export_df$regression_prediction)
+# Optional: Preview the exported table.
+table(export_df$vote_1, export_df$regression_prediction)
 
-# Step 11: Speichern als CSV-Datei für externe Analyse
+# Step 10: Save the export_df as a CSV file for external analysis.
 write.csv(export_df, "numeric_regression_predictions.csv", row.names = FALSE)
-
-

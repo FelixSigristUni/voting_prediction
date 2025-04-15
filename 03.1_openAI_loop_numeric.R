@@ -3,9 +3,8 @@ library(dplyr)
 library(httr)
 library(stringr)
 
-# Specify the number of cases to process and the round number
+# Specify the number of cases to process.
 n_cases <- 1000       # Change to 1000 for actual use
-# round_num <- 1      # Set to 1 for the first round; 2 (or higher) for subsequent rounds
 
 # Step 1: Load the clean (.rds file)
 voto_data <- readRDS("Datasets/VOTOdata_clean.rds")
@@ -19,7 +18,7 @@ base_prompt <- paste(readLines("numeric_prompt.txt"), collapse = " ")
 # Step 4: Select relevant numeric variables.
 # Variables chosen:
 # - id: Identifier
-# - vote_1: Actual vote decision (for recoding turnout)
+# - vote_1: Actual vote decision (1 = voted for, 2 = voted against; 3 = blank/did not vote)
 # - birthyear: To compute Age
 # - dectime1: Decision Time for proposal 1
 # - lrsp: Political Left-Right placement
@@ -37,19 +36,12 @@ if("birthyear" %in% names(voto_data_numeric)){
   voto_data_numeric <- voto_data_numeric %>% mutate(age = current_year - birthyear)
 }
 
-# Step 6: Recode turnout based on vote_1.
-# According to the codebook for vote_1:
-#   1 = yes (voted), 2 = no (voted), 3 = blank/did not vote.
-# Recode as:
-#   voted_flag = 1 if vote_1 is 1 or 2 (voted)
-#   voted_flag = 2 if vote_1 is 3 (did not vote)
-voto_data_numeric <- voto_data_numeric %>%
-  filter(vote_1 %in% c(1, 2, 3)) %>%
-  mutate(voted_flag = if_else(vote_1 %in% c(1, 2), 1, 2))
+# Step 6: Keep only cases with vote_1 equal to 1 (voted for) or 2 (voted against)
+voto_data_numeric <- voto_data_numeric %>% filter(vote_1 %in% c(1, 2))
 
 # Step 7: Exclude cases with missing values in key numeric predictors.
 valid_data <- voto_data_numeric %>%
-  filter(!is.na(voted_flag),
+  filter(!is.na(vote_1),
          !is.na(dectime1),
          !is.na(lrsp),
          !is.na(income),
@@ -61,37 +53,37 @@ if("age" %in% names(voto_data_numeric)){
   valid_data <- valid_data %>% filter(!is.na(age))
 }
 
-# Step 8: Stratified sampling to obtain roughly one third non-voters.
-n_non <- round(n_cases / 3)
-n_voted <- n_cases - n_non
+# Step 8: Stratified sampling to obtain balanced groups for "voted for" (vote_1 == 1) and "voted against" (vote_1 == 2).
+n_target <- round(n_cases / 2)
+voted_for <- valid_data %>% filter(vote_1 == 1)
+voted_against <- valid_data %>% filter(vote_1 == 2)
 
-voters <- valid_data %>% filter(voted_flag == 1)
-non_voters <- valid_data %>% filter(voted_flag == 2)
-
-voters_sample <- if(nrow(voters) >= n_voted) {
-  voters %>% sample_n(n_voted)
+voted_for_sample <- if(nrow(voted_for) >= n_target) {
+  voted_for %>% sample_n(n_target)
 } else {
-  voters
+  voted_for
 }
 
-non_voters_sample <- if(nrow(non_voters) >= n_non) {
-  non_voters %>% sample_n(n_non)
+voted_against_sample <- if(nrow(voted_against) >= n_target) {
+  voted_against %>% sample_n(n_target)
 } else {
-  non_voters
+  voted_against
 }
 
-valid_data_sample <- bind_rows(voters_sample, non_voters_sample)
+valid_data_sample <- bind_rows(voted_for_sample, voted_against_sample)
 
-# # Step 9: For rounds beyond the first, exclude cases already processed.
+# Step 9: For rounds beyond the first, exclude cases already processed.
 # prev_filename <- paste0("numeric_api_predictions_SCRUTIN_PROMPT_round", round_num - 1, ".csv")
 # if(round_num > 1 && file.exists(prev_filename)){
 #   previous_results <- read.csv(prev_filename, stringsAsFactors = FALSE)
 #   valid_data_sample <- valid_data_sample %>% filter(!id %in% previous_results$id)
 # }
 
-# Step 10: Randomly sample n_cases from the remaining valid data.
+# Step 10: Randomly sample n_cases from the remaining valid data if needed.
 set.seed(123)  # For reproducibility
-valid_data_sample <- valid_data_sample %>% sample_n(n_cases)
+if(nrow(valid_data_sample) > n_cases) {
+  valid_data_sample <- valid_data_sample %>% sample_n(n_cases)
+}
 
 # Step 11: Initialize a vector to store API responses.
 api_responses <- vector("character", length = nrow(valid_data_sample))
