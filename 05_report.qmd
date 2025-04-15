@@ -177,10 +177,30 @@ These evaluation results are presented in a systematic order below, in order to 
 
 ## 3.2 Results for Each Model
 
--   Results for the ChatGPT Text Model
--   Results for the ChatGPT Numeric Model
--   Results for the ChatGPT Combined Model
--   Results for the Logistic Regression Model
+### 3.2.1 Results for the ChatGPT Text Model
+
+The ChatGPT Text model, which bases its predictions only on the open-ended text input, achieved an overall accuracy of 74.3%. The heatmap (figure above) shows that the model correctly classifies most of the respondents based on their text input. However, the heatmap also displays some misclassifications.
+
+From the error metrics, class 1 (voting in favor) shows a false positive rate of 5.4% and a false negative rate of 15.9%. This indicates that while the model sometimes confuses genuine "yes" votes with "no" votes, it more frequently fails to recognize some actual "yes" votes. In contrast, class 2 (voting against) exhibits a 10.4% false positive rate and a 9.8% false negative rate, which is a more balanced distribution of errors. Still, also here there is room for improvement.
+
+These results suggest that textual inputs alone can capture valuable signals regarding respondents' motivations, but there is the danger of ambiguities in language. When individuals express nuanced or less explicit reasons, the model tends to misclassify these respondents. Nonetheless, this model provides an interpretative advantage by revealing the rationale behind each prediction which also means highlighting potential areas of confusion.
+
+### 3.2.2 Results for the ChatGPT Numeric Model
+
+The ChatGPT Numeric Model, which only relies on numeric indicators such as age, political orientation and other demographic variables, achieved an overall accuracy of 47.65%. The heatmap displays that the model struggles to classify many respondents voting behavior suggesting that the LLM can not base its predicitions only on numerical input.
+
+From the error metrics, class 1 (voting in favor) shows a false positive rate of 8.31% and a false negative rate of 23.82%. This implies that the model mislabels some of the "no" votes as "yes" votes but far more often misclassifies actual "yes" votes. These figures highlight the limitations of my model which only provides numerical input and no further explanation regarding the topic of the proposals which is voted on etc.
+
+### 3.2.3 Results for the ChatGPT Combined Model
+
+This model, which combines both open-ended textual justifications aswell as numeric indicators achieved an overall accuracy of 83.2%. As shown in the heatmap above, correct classifications cluster along the main diagonal of the confusion matrix, which highlights that the combination of qualitative and quantitative data enhances the model's predictive performance.
+
+Regarding the error metrics, class 1 (voting in favor) has a false positive rate of 3.2% and a false negative rate of 11.1%, while class 2 (voting against) shows a false positive rate of 6.4% and a false negative rate of 5.8%. These numbers suggest that the combined approach not only improves the overall accuracy but also reduces misclassification rates by mitigating the ambiguities which arise with the usage of one data type only.
+
+Overall, these results indicate that combining numerical and textual input offers a more robust framework for capturing the complex nuances of voting behavior. The enhanced performance, as demonstrated by the concentrated clustering in the heatmap and the improved error metrics, underscores the importance of combining multiple data types as an input for prediction models.
+
+### 3.2.4 Results for the Logistic Regression Model
+
 -   Comparative discussion of performance and error metrics
 
 # 4. Discussion
