@@ -179,7 +179,7 @@ These evaluation results are presented in a systematic order below, in order to 
 
 ### 3.2.1 Results for the ChatGPT Text Model
 
-![](results_safe/textonlyheatmap.jpeg)
+![](confusion_matrix_plot.png)
 
 The ChatGPT Text model, which bases its predictions only on the open-ended text input, achieved an overall accuracy of 74.3%. The heatmap (figure above) shows that the model correctly classifies most of the respondents based on their text input. However, the heatmap also displays some misclassifications.
 
@@ -197,9 +197,7 @@ From the error metrics, class 1 (voting in favor) shows a false positive rate of
 
 ### 3.2.3 Results for the ChatGPT Combined Model
 
-![](confusion_matrix_plot_numeric.png){width="100%"}
-
-This model, which combines both open-ended textual justifications aswell as numeric indicators achieved an overall accuracy of 83.2%. As shown in the heatmap above, correct classifications cluster along the main diagonal of the confusion matrix, which highlights that the combination of qualitative and quantitative data enhances the model's predictive performance.
+![](confusion_matrix_plot_textandnumeric.png)This model, which combines both open-ended textual justifications aswell as numeric indicators achieved an overall accuracy of 83.2%. As shown in the heatmap above, correct classifications cluster along the main diagonal of the confusion matrix, which highlights that the combination of qualitative and quantitative data enhances the model's predictive performance.
 
 Regarding the error metrics, class 1 (voting in favor) has a false positive rate of 3.2% and a false negative rate of 11.1%, while class 2 (voting against) shows a false positive rate of 6.4% and a false negative rate of 5.8%. These numbers suggest that the combined approach not only improves the overall accuracy but also reduces misclassification rates by mitigating the ambiguities which arise with the usage of one data type only.
 
@@ -207,9 +205,13 @@ Overall, these results indicate that combining numerical and textual input offer
 
 ### 3.2.4 Results for the Logistic Regression Model
 
-LOREM Iposum
+![](confusion_matrix_plot_regression.png)
 
--   Comparative discussion of performance and error metrics
+The logistic model, which serves as a traditional reference for the other models, achieved an overall accuracy of 70.45%, using the same numeric predictors as the ChatGPT Numeric approach. As shown in the confusion matrix above, correct classifications line up more prominentely along the main diagonal compared to the numeric LLM approach. Still, a considerable number of misclassifications exists.
+
+From the error metrics, class 1 (voting in favor) exhibits a false positive rate of 19.8% and a false negative rate of 9.75%. Class 2, (voting against) has a false positive rate of around 9.75% and a false negative rate of 19.8%. This inversion is normal for binary classification as any error that misclassifies a "no" vote as a "yes" note or vice versa simultaneously counts as a false positive for one class and a false negative for the other. This did not occur in the other confusion matrices as the value "99" was present.
+
+Although this logistic regression outperforms the ChatGPT Numeric Model, these figures show that the logistic regression still confuses a notable share of "yes" votes for "no" votes and vice versa. This underlines the complexity of modeling voting decision making using only numeric data as input.
 
 # 4. Discussion
 
