@@ -25,7 +25,7 @@ heatmap_plot <- ggplot(confusion_df, aes(x = Actual, y = Predicted, fill = Freq)
   geom_text(aes(label = Freq), color = "white", size = 6) +
   scale_fill_gradient(low = "blue", high = "red") +
   labs(title = "Confusion Matrix: Regression Prediction vs. Actual Vote",
-       x = "Actual Vote (voted_flag)",
+       x = "Actual Vote (vote_1)",
        y = "Predicted Vote (regression_prediction)") +
   theme_minimal()
 

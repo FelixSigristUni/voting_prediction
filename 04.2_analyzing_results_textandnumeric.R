@@ -25,14 +25,14 @@ heatmap_plot <- ggplot(confusion_df, aes(x = Actual, y = Predicted, fill = Freq)
   geom_text(aes(label = Freq), color = "white", size = 6) +
   scale_fill_gradient(low = "blue", high = "red") +
   labs(title = "Confusion Matrix: textandnumeric Prediction vs. Actual Turnout",
-       x = "Actual Turnout (voted_flag)",
-       y = "API Predicted Turnout (api_vote)") +
+       x = "Actual Vote (vote_1)",
+       y = "ChatGPT Predicted Vote (chatgpt_vote)")  +
   theme_minimal()
 
 print(heatmap_plot)
 
 # Optionally, save the heatmap as a PNG file.
-ggsave("confusion_matrix_plot_numeric.png", heatmap_plot, width = 8, height = 6)
+ggsave("confusion_matrix_plot_textandnumeric.png", heatmap_plot, width = 8, height = 6)
 
 # Step 5: Compute overall accuracy.
 cm <- as.matrix(confusion_matrix)
