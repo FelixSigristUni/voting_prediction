@@ -1,94 +1,122 @@
 # Predicting Swiss Voting Outcomes at the Individual Level
 
-This project explores methods for predicting how individuals voted—whether in favor (coded as 1) or against (coded as 2)—in Swiss popular votes. All analyses are performed on individual-level data, capturing the nuances of personal voting behavior without aggregation.
+This project looks into how individual citizens in Switzerland voted in recent popular votes—specifically, whether they voted in favor (coded as 1) or against (coded as 2) a proposal. All analysis is based on individual-level data, without any aggregation, which allows us to take a closer look at personal motivations and decision-making patterns.
 
 ## Project Overview
 
-We implement four distinct modeling approaches:
+The analysis compares four different models:
 
 1. **ChatGPT Text Model**  
-   Uses open-ended textual responses from voters to predict their vote choice. In addition to a numeric prediction, ChatGPT generates a detailed natural language explanation for its decision.
+   This model uses the voters' own written justifications to predict how they voted. Along with the prediction (yes or no), it provides a brief explanation of why it thinks the person voted that way.
 
 2. **ChatGPT Numeric Model**  
-   Employs a custom-engineered numeric prompt based on key demographic and political indicators (such as Age, Decision Time, Political Left-Right Placement, Income, Education, Trust in the Federal Council, Importance of Voting, TV Voting Debates Use, and Newspaper Articles Use) to predict the vote choice. ChatGPT returns a numeric prediction (1 for in favor, 2 for against, or 99 if ambiguous) along with a brief explanation.
+   Here, only structured data is used—things like age, political orientation, income, education, trust in the government, and so on. The model receives these inputs and gives back a prediction and a short explanation. If the information is unclear, it returns a 99 to indicate uncertainty.
 
 3. **ChatGPT Combined Model**  
-   Integrates both textual and numeric inputs. This model leverages information from open-ended responses _and_ numeric indicators, providing a richer context for prediction. Like the other ChatGPT models, it outputs a numeric answer and a brief natural language justification.
+   This model uses both the open-ended text responses and the structured numeric data. Combining these inputs allows the model to make more informed predictions and offer better explanations.
 
 4. **Logistic Regression Model**  
-   A classical statistical model built on the same key numeric and categorical predictors as the ChatGPT Numeric Model to serve as a baseline.  
-   **Note:** This regression model is purely quantitative and does not incorporate any open text responses.
+   A traditional model that only works with the numeric inputs. It acts as a baseline for comparison. Since it's a classical statistical approach, it doesn’t offer any text-based explanations.
 
 ## Data
 
-The analyses are based on individual-level data from Swiss popular vote studies. The original dataset is provided in SPSS format:
-- **`Datasets/1231_VOTO_CumulativeDataset_Data_scrutin_v1.0.0.sav`**
+The dataset used comes from post-vote surveys of Swiss voters. The version used here is in SPSS format:
 
-Key variables used in the models include:
+- `Datasets/1231_VOTO_CumulativeDataset_Data_scrutin_v1.0.0.sav`
 
-- **Age:** Computed from `birthyear`.
-- **Decision Time (dectime1):** Indicates when the vote decision was made (1 = clear from the onset, 2 = in the course of the campaign, 3 = at the last moment, 8 = don’t know, 9 = no answer).
-- **Political Left-Right (lrsp):** A scale from 0 (extreme left) to 10 (extreme right).
-- **Income:** Household income, coded into numeric groups.
-- **Education (educ):** Highest level of education (numeric code).
-- **Trust in the Federal Council (trust_1):** A rating from 0 (no trust) to 10 (complete trust).
-- **Importance of Voting (importance_1):** A rating from 0 (not important) to 10 (very important).
-- **TV Voting Debates Use (mediause_3):** Usage intensity on a scale from 0 to 10.
-- **Newspaper Articles Use (mediause_1):** Usage intensity on a scale from 0 to 10.
+Key variables include:
 
-For vote choice, the variable `vote_1` is recoded so that only cases with values 1 (voted in favor) or 2 (voted against) are used; cases with value 3 (blank/did not vote) are handled by stratified sampling.
+- `birthyear` (used to calculate age)
+- `dectime1` – when the voting decision was made
+- `lrsp` – political left-right self-assessment (0 to 10 scale)
+- `income` – household income bracket
+- `educ` – level of education
+- `trust_1` – trust in the Federal Council (0 to 10)
+- `importance_1` – how important the person considered the vote
+- `mediause_3` – how often TV debates were used
+- `mediause_1` – how often newspaper articles were used
+
+The main target variable is `vote_1`, where only respondents who voted either in favor (1) or against (2) are considered for prediction. Cases coded as 3 (non-voters) are excluded or handled separately in sampling.
 
 ## Methodology
 
-- **Prompt Engineering:**  
-  For the ChatGPT models, custom prompts are used.  
-  - The **ChatGPT Numeric Model** relies on a prompt (stored in `numeric_prompt.txt`) that explains the meaning and range of each numeric variable and instructs ChatGPT to produce a single numeric response (1, 2, or 99) plus an explanation.  
-  - The **ChatGPT Combined Model** further augments this prompt by including both the numeric indicators and select open text responses, providing richer context for prediction.
+- **Prompt Design**  
+  Custom prompts were written to guide ChatGPT’s predictions. For the numeric-only model, the prompt defines each variable and asks for a prediction with an explanation. The combined model extends this by adding excerpts from open-ended answers.
 
-- **Stratified Sampling:**  
-  The sampling approach ensures that the prediction task is challenging. For example, when predicting vote choice, the sample is stratified so that roughly one-third of cases are non-voters (or have voted against), preventing the model from leveraging an imbalanced distribution.
+- **Sampling Strategy**  
+  Samples were drawn to keep the task non-trivial. For example, groups were balanced to avoid a lopsided dataset that could bias predictions.
 
-- **Model Evaluation:**  
-  Predictions from all models are saved into uniquely named CSV files. Evaluation is performed using confusion matrices, overall accuracy, and error metrics (e.g., false positive and false negative rates). A detailed research note, provided as a Quarto document (`Model_Comparison_Report.qmd`), discusses the methodology, results, and future research directions.
+- **Evaluation Approach**  
+  All predictions are stored in separate CSV files. Model performance is evaluated using confusion matrices, overall accuracy, and false positive/negative rates. A Quarto document provides a complete report of the results and includes comparisons across models.
 
 ## Repository Contents
 
 - **Data Files:**
-  - `Datasets/1231_VOTO_CumulativeDataset_Data_scrutin_v1.0.0.sav` – The original individual-level dataset.
-  - `openai_key.txt` – Contains your private OpenAI API key (do not share publicly).
+  - `Datasets/1231_VOTO_CumulativeDataset_Data_scrutin_v1.0.0.sav` – Main dataset.
+  - `openai_key.txt` – Your OpenAI API key (keep this private).
 
 - **Prompt Files:**
-  - `numeric_prompt.txt` – Contains the custom prompt for the ChatGPT Numeric and Combined Models. (Edit as needed.)
+  - `numeric_prompt.txt` – Template used for numeric-only and combined models.
 
 - **Code Files:**
-  - `chatgpt_text_model.R` – Generates predictions using open-ended text responses.
-  - `numeric_api_model.R` – Uses numeric variables to generate predictions via ChatGPT.
-  - `combined_api_model.R` – Uses a combination of numeric and text inputs for ChatGPT predictions.
-  - `regression_model.R` – Builds a logistic regression model (purely numeric/categorical; does not process any open text responses).
-  - `evaluation_report.R` or `Model_Comparison_Report.qmd` – Generates an integrated report comparing all models.
+  - `chatgpt_text_model.R` – For predictions based only on open-ended responses.
+  - `numeric_api_model.R` – For numeric-only input using ChatGPT.
+  - `combined_api_model.R` – Combines text and numeric data for predictions.
+  - `regression_model.R` – Standard logistic regression using numeric data.
+  - `evaluation_report.R` or `Model_Comparison_Report.qmd` – Runs comparisons and generates the main report.
 
 - **Output Files:**
-  - CSV files with unique names (e.g., `chatgpt_analysis_results_combined.csv`, `numeric_api_predictions_SCRUTIN_PROMPT_roundX.csv`, `combined_api_predictions_roundX.csv`, `regression_predictions.csv`) containing model predictions.
+  - CSV files for each run, e.g., `chatgpt_analysis_results_combined.csv`, `regression_predictions.csv`, etc.
 
-- **Research Note (Quarto Document):**
-  - `Model_Comparison_Report.qmd` – A detailed document outlining the workflow, analysis, model comparisons, and future research directions.
+- **Research Note:**
+  - `Model_Comparison_Report.qmd` – Walkthrough of the full analysis and results.
+
+## File Structure
+
+This is a quick overview of the scripts and files in this repository and what they’re used for.
+
+### Data Exploration and Preprocessing
+- `00_Data_exploration.R` – First look at the raw data.
+- `01_Data_cleaning.R` – Main cleaning and recoding script.
+- `099_Data_cleaning_old.R` – Older version, kept for backup/reference.
+
+### API Setup and Prompt Templates
+- `02_Set_up_OpenAI_API.R` – Loads the OpenAI API key and verifies access.
+- `prompt1.txt`, `prompt2.txt`, `numeric_prompt.txt`, `textandnumeric_prompt.txt` – Variants of prompts for different models.
+
+### Model Execution Scripts
+- `03_openAI_loop.R` – General script for looping through cases.
+- `03.1_openAI_loop_numeric.R` – Runs predictions based on numeric data.
+- `03.2_openAI_loop_text_and_numeric.R` – Runs predictions using both data types.
+- `03.3_regression.R` – Sets up and runs the logistic regression model.
+- `03_openAI_loop_proposaltitle.R` – Variant using proposal titles; no longer in active use.
+
+### Analysis Scripts
+- `04.1_analyzing_results_numeric.R` – Evaluates predictions from the numeric model.
+- `04.2_analyzing_results_textandnumeric.R` – Evaluates the combined model.
+- `04.3_analyzing_results_regression_prediction.R` – Evaluation for the regression model.
+- `04_analyzing_results.R` – Earlier script used for general analysis.
+
+### Documentation and Reporting
+- `05_report.qmd` – Source file for the full written report.
+- `05_report.pdf` – Exported PDF version.
+- `Milestones.xlsx` – Timeline and planning document.
+- `README.md` – This file.
+- `voting_prediction.Rproj` – RStudio project file.
 
 ## Research Note
 
-A comprehensive research note is provided as a Quarto document. This document details the full analysis pipeline—including data pre-processing, model building, and evaluation—and discusses the unique benefit of ChatGPT’s ability to output natural language explanations with its predictions. In contrast, the regression model relies solely on structured data. The note offers insights into the strengths and limitations of each approach.
+The full analysis, including discussion of each model’s performance and limitations, is included in the Quarto report. The models based on ChatGPT offer explanations in natural language, while the logistic regression model is more limited to numeric output.
 
 ## Future Directions
 
-Future enhancements may include:
-- Incorporating additional predictors (e.g., further media usage indicators or measures of political interest).
-- Experimenting with ensemble methods or alternative machine learning models.
-- Refining prompt engineering to optimize the explanatory power of ChatGPT responses.
-- Combining predictions from different models to achieve higher accuracy.
+Things that could be added or improved:
+- Try additional variables, such as political interest or more detailed media use.
+- Experiment with ensemble models or other machine learning methods.
+- Tune prompts more carefully to improve explanation quality.
+- Combine outputs from different models for better overall accuracy.
 
 ## Conclusion
 
-This project demonstrates a multi-method approach to predicting individual vote choice in Swiss popular votes. A key innovation is the use of ChatGPT, which not only predicts vote choice but also provides natural language explanations—enhancing interpretability beyond what traditional regression models offer. The research note further documents and discusses these findings, setting the stage for future work in this area.
+This project combines traditional statistical tools with large language models to explore how people vote in Swiss popular votes. One of the most useful features of using ChatGPT is that it doesn't just give a prediction—it also tells you why. This adds a layer of interpretability that’s hard to get from standard models. The full report provides more detail and context behind all the results and modeling choices.
 
----
-
-This README provides an overview of the project’s objectives, methodology, and outputs, along with a brief on the accompanying Quarto research note. Feel free to modify and extend it as necessary.
