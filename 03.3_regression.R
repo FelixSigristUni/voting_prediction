@@ -22,8 +22,14 @@ model_data <- voto_data %>%
     importance_1 = as.numeric(importance_1)
   )
 
+# IMPORTANT: Relevel vote_1 so that the target outcome ("voted for" = 1) is the second level.
+# By default, glm() with family = binomial returns the probability of the second level.
+model_data <- model_data %>%
+  mutate(vote_1 = factor(vote_1, levels = c(2, 1)))
+# Now, predicted probabilities correspond to vote_1 == "1" (voted for).
+
 # Step 3: Build the logistic regression model using only the predictors that help.
-model <- glm(as.factor(vote_1) ~ age + income + trust_1 + importance_1,
+model <- glm(vote_1 ~ age + income + trust_1 + importance_1,
              data = model_data, family = binomial)
 summary(model)
 
