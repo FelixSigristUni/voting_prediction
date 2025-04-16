@@ -2,9 +2,8 @@
 title: "Voting prediction using LLMs"
 subtitle: "A Data Analysis using Swiss VOTO data"
 author: 
-  - "Felix Sigrist, felix.sigrist@stud.unilu.ch.com, 19-641-968"
+  - "Felix Sigrist, felix.sigrist@stud.unilu.ch, 19-641-968"
   - "Supervisor: Andrea de Angelis"
-  - "Number of words: 2200"
 lang: en
 date: today
 date-format: "D. MMMM YYYY"
@@ -20,10 +19,12 @@ format:
       - text: |
           \usepackage{authblk}
           \usepackage{titling}
+          \RedeclareSectionCommand[beforeskip=5pt plus 1pt minus 1pt]{section}
+          \RedeclareSectionCommand[beforeskip=10pt plus 2pt minus 2pt]{chapter}
 fontsize: 12pt
 linestretch: 1.5
-geometry: left=2cm,right=2cm,top=2cm,bottom=2cm
-bibliography: bibliography.bib
+geometry: left=2cm,right=2cm,top=2.5cm,bottom=2.5cm
+bibliography: voting_prediction_bib.bib
 citeproc: true
 execute:
   echo: false
@@ -31,8 +32,7 @@ execute:
 knitr:
   opts_chunk:
     message: false
-lof: false
-lot: false
+
 ---
 
 # Abstract {.unnumbered}
@@ -65,9 +65,9 @@ In the following sections, data sources, variable selection, methodology, model 
 
 ## 2.1 Data Source and Description
 
-The data used in this project is from the "1231 VOTO Cumulative Dataset - Scrutin". This dataset was chosen as it provides individual-level post-vote survey data from Swiss citizens collected after federal popular votes. In contrast to other datasets, text answers are included in a non-recoded version which makes it interesting for my analyses. I first wanted to choose the SELECTS dataset but unfortunately its text answers are all recoded.
+The data used in this project is from the "1231 VOTO Cumulative Dataset - Scrutin"  [@noauthor_voto_nodate]. This dataset was chosen as it provides individual-level post-vote survey data from Swiss citizens collected after federal popular votes (ebd.). In contrast to other datasets, text answers are included in a non-recoded version which makes it interesting for my analyses (ebd.). I first wanted to choose the SELECTS dataset [@noauthor_swiss_nodate]but unfortunately its text answers are all recoded.
 
-The VOTO project is a collaboration between FORS, the Centre for Democracy Studies Aarau (ZDA) and other partners. It offers a rich basis for both traditional and large langue model analysis due to its combination of survey data with open-ended text responses.
+The VOTO project is a collaboration between FORS, the Centre for Democracy Studies Aarau (ZDA) and other partners [@noauthor_voto_nodate]. It offers a rich basis for both traditional and large langue model analysis due to its combination of survey data with open-ended text responses (ebd.).
 
 My original plan, to predict voting and non-voting had to be abandonned due to the lack of responses / open-ended text answers of people that did not vote. The VOTO Dataset only includes open-ended text responses of people who voted. Therefore I changed my plan and decided to predict with different models if someone votes in favor or against a proposal.
 
@@ -237,11 +237,4 @@ Future work should try to refine these combined models. Advances in LLMs could i
 
 Ultimately, making these improvements in the combined model holds the potential to not only improve the models performance but also for a deeper understanding of the factor that drive individual voting choices, offering valuable insights for political analysis.
 
-# Appendices (if needed)
-
--   Additional tables and figures
--   Technical details of data processing and modeling
-
 # References
-
--   Any cited data sources or methodological references
