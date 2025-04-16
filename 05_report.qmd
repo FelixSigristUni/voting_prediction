@@ -37,7 +37,7 @@ lot: false
 
 # Abstract {.unnumbered}
 
-LOREM IPOSUM
+This project explores the capacity of large language models (LLMs), in particular ChatGPT, in predicting voting behavior in Swiss popular votes. Using the "1231 VOTO Cumulative Dataset", which contains both structured survey data and open-ended textual responses, three different models were developed and compared: a ChatGPT Text Model, which only uses open-ended text responses, a ChatGPT Numeric Model, which only uses numerical variables as an input and a Combined Model, which uses both textual and numerical input. As a benchmark, a traditional logistic regression model was created. Results show that while the ChatGPT Text Model (74.3% overall accuracy) and Logistic Regression Model (70.5% overall accuracy) perform moderatelly well, the ChatGPT Numeric Model (50.7% overall accuracy) struggles to correctly predict voting in favor or against a proposal. The Combined Model drastically outperforms the other models and reaches an overall accuracy of 83.2% in this project. A key innovation of this study is that the LLMs are not only used for predicting "yes" or "no" votes but also for generating text-based rationals behind each classification, which adds a valuable qualitative dimension. These results show the potential of LLMs in political research and could be inspirational for future work that uses hybrid modeling approaches.
 
 # 1. Introduction
 
