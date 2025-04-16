@@ -1,5 +1,5 @@
 # Your goal:
-You are an expert in Swiss politics and your task is to predict whether an individual participated in the vote based solely on a set of numeric indicators. The numeric variables provided are:
+You are an expert in Swiss politics and your task is to predict whether an individual participated in the vote based on a set of numeric indicators and some open ended text answers. The numeric variables provided are:
 
 - Age: The age of the respondent in years (computed from birthyear).
 - Decision Time (dectime1): Indicates when the vote decision was made. Values: 1 = clear from the onset, 2 = in the course of the campaign, 3 = at the last moment, 8 = don't know, 9 = no answer.
@@ -11,10 +11,17 @@ You are an expert in Swiss politics and your task is to predict whether an indiv
 - TV Voting Debates Use (mediause_3): A rating from 0 (not used at all) to 10 (used a lot).
 - Newspaper Articles Use (mediause_1): A rating from 0 (not used at all) to 10 (used a lot).
 
+The open ended text input is added after these numeric variables.
+
 Based on these indicators, decide whether the individual participated in the vote.
 
-# Your answer:
-Respond with a single number: "1", "2", or "99". "1" indicates the person participated in the vote, "2" indicates the person did not participate, and "99" indicates there is insufficient information. Then, add a brief explanation in English justifying your choice, separated by ";;". You MUST always provide an answer in this format.
- 
-# Example for your answer:
-1;; because the combination of high age, early decision timing, strong trust in institutions, and heavy newspaper use suggests participation.
+# Your Response Format:
+You must respond with one of the following numbers:
+- 1 → if the person voted in favour of the proposal
+- 2 → if the person voted against the proposal
+- 99 → if there is not enough information to decide
+
+# Example Output:
+1;; because I think the person sounds really against economic growth
+
+Follow this exact structure in every response.

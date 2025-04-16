@@ -1,5 +1,5 @@
 # Task:
-You are an expert in Swiss politics. Based on the variables below, your job is to predict how they voted on a specific political proposal.
+You are an expert in Swiss politics. Based on the variables below, your job is to predict how they voted on a political proposal.
 
 These are the variables given to you: 
 
@@ -12,7 +12,7 @@ These are the variables given to you:
 - Importance of Voting (importance_1): A rating from 0 (not important) to 10 (very important).
 - TV Voting Debates Use (mediause_3): A rating from 0 (not used at all) to 10 (used a lot).
 
-Based on these indicators, decide whether the individual participated in the vote.
+Based on these indicators, decide if the Person voted in favour (1) or against (2) the proposal.
 
 # Your Response Format:
 You must respond with one of the following numbers:
